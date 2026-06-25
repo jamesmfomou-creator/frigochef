@@ -4,12 +4,21 @@ import { NextResponse, type NextRequest } from 'next/server'
 const PROTECTED = ['/dashboard', '/scan', '/ingredients', '/recipes', '/pantry', '/planning', '/courses', '/history', '/account']
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+  const isProtected = PROTECTED.some(p => pathname === p || pathname.startsWith(p + '/'))
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  // If Supabase not configured, skip auth (dev/mock mode)
+  if (!supabaseUrl || !supabaseKey) {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  try {
+    const supabase = createServerClient(supabaseUrl, supabaseKey, {
       cookies: {
         getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
@@ -20,27 +29,32 @@ export async function middleware(request: NextRequest) {
           )
         },
       },
+    })
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user && isProtected) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
     }
-  )
 
-  const { data: { user } } = await supabase.auth.getUser()
+    if (user && pathname === '/login') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
 
-  const pathname = request.nextUrl.pathname
-  const isProtected = PROTECTED.some(p => pathname === p || pathname.startsWith(p + '/'))
-
-  if (!user && isProtected) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+    return supabaseResponse
+  } catch {
+    // Auth check failed — redirect to login for protected routes
+    if (isProtected) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+    return NextResponse.next({ request })
   }
-
-  if (user && pathname === '/login') {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
-  }
-
-  return supabaseResponse
 }
 
 export const config = {
