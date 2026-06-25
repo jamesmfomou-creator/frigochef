@@ -22,12 +22,14 @@ export default function PlanningPage() {
   const supabase = createClient()
 
   const isPremium = profile?.plan === 'premium'
+  const isDemo = profile?.id === 'demo'
 
   useEffect(() => {
     if (!isPremium) return
+    if (isDemo) { setLoading(false); return }
     loadPlan()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPremium])
+  }, [isPremium, isDemo])
 
   async function loadPlan() {
     setLoading(true)
@@ -44,8 +46,11 @@ export default function PlanningPage() {
   async function generateWeek() {
     setGenerating(true)
     try {
-      const { data: pantryData } = await supabase.from('pantry_items').select('name')
-      const pantryIngredients = (pantryData ?? []).map((i: { name: string }) => i.name)
+      let pantryIngredients: string[] = []
+      if (!isDemo) {
+        const { data: pantryData } = await supabase.from('pantry_items').select('name')
+        pantryIngredients = (pantryData ?? []).map((i: { name: string }) => i.name)
+      }
 
       const res = await fetch('/api/planning', {
         method: 'POST',
@@ -54,6 +59,11 @@ export default function PlanningPage() {
       })
       const data = await res.json()
       if (!data.days) throw new Error()
+
+      if (isDemo) {
+        setPlan({ id: 'demo', user_id: 'demo', week_start: getMonday(), days: data.days, created_at: new Date().toISOString() })
+        return
+      }
 
       const weekStart = getMonday()
       const { data: { user } } = await supabase.auth.getUser()

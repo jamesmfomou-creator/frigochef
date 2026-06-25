@@ -19,12 +19,14 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
   const isPremium = profile?.plan === 'premium'
+  const isDemo = profile?.id === 'demo'
 
   useEffect(() => {
     if (!isPremium) return
+    if (isDemo) { setLoading(false); return }
     load()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPremium])
+  }, [isPremium, isDemo])
 
   async function load() {
     setLoading(true)

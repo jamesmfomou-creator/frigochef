@@ -18,12 +18,14 @@ export default function PantryPage() {
   const supabase = createClient()
 
   const isPremium = profile?.plan === 'premium'
+  const isDemo = profile?.id === 'demo'
 
   useEffect(() => {
     if (!isPremium) return
+    if (isDemo) { setLoading(false); return }
     loadItems()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPremium])
+  }, [isPremium, isDemo])
 
   async function loadItems() {
     setLoading(true)
@@ -33,7 +35,7 @@ export default function PantryPage() {
   }
 
   async function deleteItem(id: string) {
-    await supabase.from('pantry_items').delete().eq('id', id)
+    if (!isDemo) await supabase.from('pantry_items').delete().eq('id', id)
     setItems(prev => prev.filter(i => i.id !== id))
   }
 

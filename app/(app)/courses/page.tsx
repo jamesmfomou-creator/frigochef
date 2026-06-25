@@ -18,12 +18,14 @@ export default function CoursesPage() {
   const [newCat, setNewCat] = useState('')
   const supabase = createClient()
   const isPremium = profile?.plan === 'premium'
+  const isDemo = profile?.id === 'demo'
 
   useEffect(() => {
     if (!isPremium) return
+    if (isDemo) { setLoading(false); return }
     loadList()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPremium])
+  }, [isPremium, isDemo])
 
   async function loadList() {
     setLoading(true)
@@ -41,7 +43,7 @@ export default function CoursesPage() {
 
   async function saveItems(newItems: ShoppingItem[]) {
     setItems(newItems)
-    if (listId) await supabase.from('shopping_lists').update({ items: newItems, updated_at: new Date().toISOString() }).eq('id', listId)
+    if (!isDemo && listId) await supabase.from('shopping_lists').update({ items: newItems, updated_at: new Date().toISOString() }).eq('id', listId)
   }
 
   function toggle(id: string) {
