@@ -25,12 +25,6 @@ export default function LandingPage() {
 
       {/* Hero */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 pb-24">
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 mb-10 px-4 py-2 rounded-full border border-white/10 bg-white/[0.06] text-sm text-gray-400 animate-fade-in">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          Propulsé par GPT-4o Vision
-        </div>
-
         {/* Title */}
         <h1 className="text-6xl sm:text-7xl font-black text-white tracking-tight leading-[1.04] mb-5 animate-slide-up">
           Ouvre ton frigo.
