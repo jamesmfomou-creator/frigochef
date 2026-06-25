@@ -1,65 +1,30 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const PROTECTED = ['/dashboard', '/scan', '/ingredients', '/recipes', '/pantry', '/planning', '/courses', '/history', '/account']
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const isProtected = PROTECTED.some(p => pathname === p || pathname.startsWith(p + '/'))
 
-  // Demo mode — bypass all auth
+  if (!isProtected) return NextResponse.next()
+
+  // Demo mode — bypass auth
   if (request.cookies.get('frigochef_demo')?.value === 'true') {
-    return NextResponse.next({ request })
+    return NextResponse.next()
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  // Check for Supabase session cookie (set by @supabase/ssr)
+  const hasSession = request.cookies.getAll().some(
+    c => c.name.includes('-auth-token') && c.value
+  )
 
-  // If Supabase not configured, skip auth (dev/mock mode)
-  if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.next({ request })
+  if (!hasSession) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
   }
 
-  let supabaseResponse = NextResponse.next({ request })
-
-  try {
-    const supabase = createServerClient(supabaseUrl, supabaseKey, {
-      cookies: {
-        getAll() { return request.cookies.getAll() },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    })
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user && isProtected) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
-
-    if (user && pathname === '/login') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
-      return NextResponse.redirect(url)
-    }
-
-    return supabaseResponse
-  } catch {
-    // Auth check failed — redirect to login for protected routes
-    if (isProtected) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
-    return NextResponse.next({ request })
-  }
+  return NextResponse.next()
 }
 
 export const config = {
