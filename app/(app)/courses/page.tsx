@@ -1,22 +1,20 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { ShoppingItem, ShoppingList, PANTRY_CATEGORIES } from '@/lib/types'
-import { createClient } from '@/lib/supabase/client'
+import { safeCreateClient } from '@/lib/supabase/client'
 import { useProfile } from '@/components/providers/ProfileProvider'
 import PremiumModal from '@/components/premium/PremiumModal'
 
 export default function CoursesPage() {
   const profile = useProfile()
-  const router = useRouter()
   const [items, setItems] = useState<ShoppingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [listId, setListId] = useState<string | null>(null)
   const [newName, setNewName] = useState('')
   const [newQty, setNewQty] = useState('')
   const [newCat, setNewCat] = useState('')
-  const supabase = createClient()
+
   const isPremium = profile?.plan === 'premium'
   const isDemo = profile?.id === 'demo'
 
@@ -28,10 +26,11 @@ export default function CoursesPage() {
   }, [isPremium, isDemo])
 
   async function loadList() {
+    const supabase = safeCreateClient()
+    if (!supabase) { setLoading(false); return }
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setLoading(false); return }
-
     let { data } = await supabase.from('shopping_lists').select('*').eq('user_id', user.id).single<ShoppingList>()
     if (!data) {
       const { data: created } = await supabase.from('shopping_lists').insert({ user_id: user.id, items: [] }).select().single<ShoppingList>()
@@ -43,24 +42,18 @@ export default function CoursesPage() {
 
   async function saveItems(newItems: ShoppingItem[]) {
     setItems(newItems)
-    if (!isDemo && listId) await supabase.from('shopping_lists').update({ items: newItems, updated_at: new Date().toISOString() }).eq('id', listId)
+    if (!isDemo && listId) {
+      const supabase = safeCreateClient()
+      if (supabase) await supabase.from('shopping_lists').update({ items: newItems, updated_at: new Date().toISOString() }).eq('id', listId)
+    }
   }
 
-  function toggle(id: string) {
-    saveItems(items.map(i => i.id === id ? { ...i, checked: !i.checked } : i))
-  }
-
+  function toggle(id: string) { saveItems(items.map(i => i.id === id ? { ...i, checked: !i.checked } : i)) }
   function remove(id: string) { saveItems(items.filter(i => i.id !== id)) }
 
   function addItem() {
     if (!newName.trim()) return
-    const item: ShoppingItem = {
-      id: Date.now().toString(),
-      name: newName.trim(),
-      quantity: newQty.trim() || '1',
-      category: newCat || 'Autres',
-      checked: false,
-    }
+    const item: ShoppingItem = { id: Date.now().toString(), name: newName.trim(), quantity: newQty.trim() || '1', category: newCat || 'Autres', checked: false }
     saveItems([...items, item])
     setNewName(''); setNewQty(''); setNewCat('')
   }
@@ -95,7 +88,6 @@ export default function CoursesPage() {
           )}
         </div>
       </header>
-
       <main className="max-w-lg mx-auto px-4 py-5">
         {/* Add item */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-5">
@@ -119,7 +111,7 @@ export default function CoursesPage() {
           <div className="text-center py-12">
             <div className="text-5xl mb-4">🛒</div>
             <h3 className="font-black text-gray-900 text-lg mb-2">Liste vide</h3>
-            <p className="text-gray-400 text-sm">Ajoutez des articles ou générez depuis votre planning</p>
+            <p className="text-gray-400 text-sm">Ajoutez des articles ci-dessus</p>
           </div>
         ) : (
           <>
@@ -127,20 +119,15 @@ export default function CoursesPage() {
               <div key={cat} className="mb-5">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{cat}</p>
                 <div className="space-y-2">
-                  {catItems.map(item => (
-                    <ShoppingItemRow key={item.id} item={item} onToggle={() => toggle(item.id)} onDelete={() => remove(item.id)} />
-                  ))}
+                  {catItems.map(item => <ShoppingItemRow key={item.id} item={item} onToggle={() => toggle(item.id)} onDelete={() => remove(item.id)} />)}
                 </div>
               </div>
             ))}
-
             {checked.length > 0 && (
               <div className="mt-6">
                 <p className="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Cochés</p>
                 <div className="space-y-2 opacity-50">
-                  {checked.map(item => (
-                    <ShoppingItemRow key={item.id} item={item} onToggle={() => toggle(item.id)} onDelete={() => remove(item.id)} />
-                  ))}
+                  {checked.map(item => <ShoppingItemRow key={item.id} item={item} onToggle={() => toggle(item.id)} onDelete={() => remove(item.id)} />)}
                 </div>
               </div>
             )}
@@ -153,7 +140,7 @@ export default function CoursesPage() {
 
 function ShoppingItemRow({ item, onToggle, onDelete }: { item: ShoppingItem; onToggle: () => void; onDelete: () => void }) {
   return (
-    <div className={`bg-white rounded-xl px-4 py-3 flex items-center gap-3 border shadow-sm transition-all ${item.checked ? 'border-green-100' : 'border-gray-100'}`}>
+    <div className={`bg-white rounded-xl px-4 py-3 flex items-center gap-3 border shadow-sm ${item.checked ? 'border-green-100' : 'border-gray-100'}`}>
       <button onClick={onToggle} className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${item.checked ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-green-400'}`}>
         {item.checked && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
       </button>
@@ -169,15 +156,13 @@ function ShoppingItemRow({ item, onToggle, onDelete }: { item: ShoppingItem; onT
 }
 
 function PremiumGate() {
-  const [show, setShow] = useState(true)
-  const router = useRouter()
+  const [show, setShow] = useState(false)
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center px-6 text-center">
       <div className="text-5xl mb-4">🛒</div>
       <h2 className="text-xl font-black text-gray-900 mb-2">Liste de courses intelligente</h2>
       <p className="text-gray-500 text-sm mb-6">Générée automatiquement depuis votre planning. Fonctionnalité Premium.</p>
       <button onClick={() => setShow(true)} className="bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-4 rounded-2xl transition-colors">⭐ Passer Premium</button>
-      <button onClick={() => router.back()} className="mt-4 text-gray-400 text-sm hover:text-gray-600 transition-colors">← Retour</button>
       {show && <PremiumModal onClose={() => setShow(false)} />}
     </div>
   )

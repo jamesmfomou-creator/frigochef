@@ -1,21 +1,18 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { PantryItem, PANTRY_CATEGORIES } from '@/lib/types'
-import { createClient } from '@/lib/supabase/client'
+import { safeCreateClient } from '@/lib/supabase/client'
 import { useProfile } from '@/components/providers/ProfileProvider'
 import PremiumModal from '@/components/premium/PremiumModal'
 
 export default function PantryPage() {
   const profile = useProfile()
-  const router = useRouter()
   const [items, setItems] = useState<PantryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('Tous')
   const [showAdd, setShowAdd] = useState(false)
   const [editItem, setEditItem] = useState<PantryItem | null>(null)
-  const supabase = createClient()
 
   const isPremium = profile?.plan === 'premium'
   const isDemo = profile?.id === 'demo'
@@ -28,6 +25,8 @@ export default function PantryPage() {
   }, [isPremium, isDemo])
 
   async function loadItems() {
+    const supabase = safeCreateClient()
+    if (!supabase) { setLoading(false); return }
     setLoading(true)
     const { data } = await supabase.from('pantry_items').select('*').order('added_at', { ascending: false })
     setItems((data as PantryItem[]) ?? [])
@@ -35,17 +34,17 @@ export default function PantryPage() {
   }
 
   async function deleteItem(id: string) {
-    if (!isDemo) await supabase.from('pantry_items').delete().eq('id', id)
+    if (!isDemo) {
+      const supabase = safeCreateClient()
+      if (supabase) await supabase.from('pantry_items').delete().eq('id', id)
+    }
     setItems(prev => prev.filter(i => i.id !== id))
   }
 
   const now = new Date()
   const categories = ['Tous', ...PANTRY_CATEGORIES]
   const filtered = filter === 'Tous' ? items : items.filter(i => i.category === filter)
-  const urgentCount = items.filter(i => {
-    const days = Math.floor((now.getTime() - new Date(i.added_at).getTime()) / 86400000)
-    return days >= 5
-  }).length
+  const urgentCount = items.filter(i => Math.floor((now.getTime() - new Date(i.added_at).getTime()) / 86400000) >= 5).length
 
   if (!isPremium) return <PremiumGate />
 
@@ -60,59 +59,31 @@ export default function PantryPage() {
               {urgentCount > 0 && <span className="text-amber-500 ml-2">· {urgentCount} à utiliser vite</span>}
             </p>
           </div>
-          <button
-            onClick={() => setShowAdd(true)}
-            className="w-10 h-10 bg-green-500 hover:bg-green-400 text-white rounded-xl flex items-center justify-center transition-colors shadow-sm shadow-green-500/20"
-          >
+          <button onClick={() => setShowAdd(true)} className="w-10 h-10 bg-green-500 hover:bg-green-400 text-white rounded-xl flex items-center justify-center transition-colors">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
         </div>
-
-        {/* Category filter */}
-        <div className="max-w-lg mx-auto mt-4 -mx-1 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2 px-1">
+        <div className="max-w-lg mx-auto mt-4 overflow-x-auto">
+          <div className="flex gap-2">
             {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setFilter(cat)}
-                className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
-                  filter === cat ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                }`}
-              >
-                {cat}
-              </button>
+              <button key={cat} onClick={() => setFilter(cat)} className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${filter === cat ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>{cat}</button>
             ))}
           </div>
         </div>
       </header>
-
       <main className="max-w-lg mx-auto px-4 py-5">
         {loading ? (
-          <div className="space-y-3">
-            {[1,2,3,4,5].map(n => <div key={n} className="h-16 bg-white rounded-2xl skeleton" />)}
-          </div>
+          <div className="space-y-3">{[1,2,3,4,5].map(n => <div key={n} className="h-16 bg-white rounded-2xl skeleton" />)}</div>
         ) : filtered.length === 0 ? (
           <EmptyPantry onAdd={() => setShowAdd(true)} />
         ) : (
           <div className="space-y-2">
-            {filtered.map(item => (
-              <PantryItemRow
-                key={item.id}
-                item={item}
-                onEdit={() => setEditItem(item)}
-                onDelete={() => deleteItem(item.id)}
-              />
-            ))}
+            {filtered.map(item => <PantryItemRow key={item.id} item={item} onEdit={() => setEditItem(item)} onDelete={() => deleteItem(item.id)} />)}
           </div>
         )}
       </main>
-
       {(showAdd || editItem) && (
-        <ItemForm
-          item={editItem}
-          onClose={() => { setShowAdd(false); setEditItem(null) }}
-          onSave={loadItems}
-        />
+        <ItemForm item={editItem} onClose={() => { setShowAdd(false); setEditItem(null) }} onSave={loadItems} isDemo={isDemo} />
       )}
     </div>
   )
@@ -121,9 +92,8 @@ export default function PantryPage() {
 function PantryItemRow({ item, onEdit, onDelete }: { item: PantryItem; onEdit: () => void; onDelete: () => void }) {
   const days = Math.floor((new Date().getTime() - new Date(item.added_at).getTime()) / 86400000)
   const urgent = days >= 5
-
   return (
-    <div className="bg-white rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-sm border border-gray-100 animate-fade-in">
+    <div className="bg-white rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-sm border border-gray-100">
       <div className={`w-2 h-2 rounded-full shrink-0 ${urgent ? 'bg-amber-400' : 'bg-green-400'}`} />
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-gray-900 text-sm truncate">{item.name}</p>
@@ -145,8 +115,7 @@ function PantryItemRow({ item, onEdit, onDelete }: { item: PantryItem; onEdit: (
   )
 }
 
-function ItemForm({ item, onClose, onSave }: { item: PantryItem | null; onClose: () => void; onSave: () => void }) {
-  const supabase = createClient()
+function ItemForm({ item, onClose, onSave, isDemo }: { item: PantryItem | null; onClose: () => void; onSave: () => void; isDemo: boolean }) {
   const [name, setName] = useState(item?.name ?? '')
   const [quantity, setQuantity] = useState(item?.quantity ?? '')
   const [category, setCategory] = useState(item?.category ?? '')
@@ -155,16 +124,17 @@ function ItemForm({ item, onClose, onSave }: { item: PantryItem | null; onClose:
   async function save() {
     if (!name.trim()) return
     setSaving(true)
+    if (isDemo) { await onSave(); onClose(); return }
+    const supabase = safeCreateClient()
+    if (!supabase) { onClose(); return }
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { onClose(); return }
-
     if (item) {
       await supabase.from('pantry_items').update({ name: name.trim(), quantity: quantity || null, category: category || null, updated_at: new Date().toISOString() }).eq('id', item.id)
     } else {
       await supabase.from('pantry_items').insert({ user_id: user.id, name: name.trim(), quantity: quantity || null, category: category || null })
     }
-    await onSave()
-    onClose()
+    await onSave(); onClose()
   }
 
   return (
@@ -181,9 +151,7 @@ function ItemForm({ item, onClose, onSave }: { item: PantryItem | null; onClose:
           </select>
         </div>
         <div className="flex gap-3">
-          <button onClick={save} disabled={saving || !name.trim()} className="flex-1 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-colors">
-            {saving ? 'Sauvegarde…' : 'Sauvegarder'}
-          </button>
+          <button onClick={save} disabled={saving || !name.trim()} className="flex-1 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-colors">{saving ? 'Sauvegarde…' : 'Sauvegarder'}</button>
           <button onClick={onClose} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-3.5 rounded-xl transition-colors">Annuler</button>
         </div>
       </div>
@@ -203,15 +171,13 @@ function EmptyPantry({ onAdd }: { onAdd: () => void }) {
 }
 
 function PremiumGate() {
-  const [show, setShow] = useState(true)
-  const router = useRouter()
+  const [show, setShow] = useState(false)
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center px-6 text-center">
       <div className="text-5xl mb-4">🔒</div>
       <h2 className="text-xl font-black text-gray-900 mb-2">Fonctionnalité Premium</h2>
       <p className="text-gray-500 text-sm mb-6">Le Pantry est disponible avec l&apos;abonnement Premium.</p>
       <button onClick={() => setShow(true)} className="bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-4 rounded-2xl transition-colors">⭐ Passer Premium</button>
-      <button onClick={() => router.back()} className="mt-4 text-gray-400 text-sm hover:text-gray-600 transition-colors">← Retour</button>
       {show && <PremiumModal onClose={() => setShow(false)} />}
     </div>
   )

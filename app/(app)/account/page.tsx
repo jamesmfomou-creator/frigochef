@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useProfile } from '@/components/providers/ProfileProvider'
-import { createClient } from '@/lib/supabase/client'
+import { safeCreateClient } from '@/lib/supabase/client'
 import PremiumModal from '@/components/premium/PremiumModal'
 import { FREE_SCAN_LIMIT } from '@/lib/types'
 
@@ -12,14 +12,20 @@ export default function AccountPage() {
   const router = useRouter()
   const [showPremium, setShowPremium] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
-  const supabase = createClient()
 
   const isPremium = profile?.plan === 'premium'
+  const isDemo = profile?.id === 'demo'
   const initial = (profile?.name?.[0] ?? profile?.email?.[0] ?? 'U').toUpperCase()
 
   async function signOut() {
+    if (isDemo) {
+      document.cookie = 'frigochef_demo=; path=/; max-age=0'
+      router.push('/')
+      return
+    }
     setLoggingOut(true)
-    await supabase.auth.signOut()
+    const supabase = safeCreateClient()
+    if (supabase) await supabase.auth.signOut()
     router.push('/')
   }
 
@@ -30,7 +36,6 @@ export default function AccountPage() {
           <h1 className="text-2xl font-black text-gray-900">Mon compte</h1>
         </div>
       </header>
-
       <main className="max-w-lg mx-auto px-4 py-5 space-y-4">
         {/* Profile card */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
@@ -42,8 +47,8 @@ export default function AccountPage() {
               ) : initial}
             </div>
             <div>
-              <p className="font-black text-gray-900 text-lg">{profile?.name ?? 'Utilisateur'}</p>
-              <p className="text-gray-400 text-sm">{profile?.email}</p>
+              <p className="font-black text-gray-900 text-lg">{isDemo ? 'Mode Démo' : (profile?.name ?? 'Utilisateur')}</p>
+              <p className="text-gray-400 text-sm">{isDemo ? 'demo@frigochef.app' : profile?.email}</p>
               <span className={`inline-flex items-center gap-1 text-xs font-bold mt-1 px-2.5 py-0.5 rounded-full ${isPremium ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-500'}`}>
                 {isPremium ? '⭐ Premium' : '🆓 Gratuit'}
               </span>
@@ -51,8 +56,8 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* Usage */}
-        {!isPremium && (
+        {/* Usage for free users */}
+        {!isPremium && !isDemo && (
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <p className="font-bold text-gray-900 mb-3">Utilisation ce mois</p>
             <div className="flex items-center justify-between mb-2">
@@ -60,10 +65,7 @@ export default function AccountPage() {
               <span className="text-sm font-semibold text-gray-900">{profile?.scan_count ?? 0} / {FREE_SCAN_LIMIT}</span>
             </div>
             <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
-              <div
-                className={`h-full rounded-full transition-all ${(profile?.scan_count ?? 0) >= FREE_SCAN_LIMIT ? 'bg-red-400' : 'bg-green-500'}`}
-                style={{ width: `${Math.min(100, ((profile?.scan_count ?? 0) / FREE_SCAN_LIMIT) * 100)}%` }}
-              />
+              <div className={`h-full rounded-full transition-all ${(profile?.scan_count ?? 0) >= FREE_SCAN_LIMIT ? 'bg-red-400' : 'bg-green-500'}`} style={{ width: `${Math.min(100, ((profile?.scan_count ?? 0) / FREE_SCAN_LIMIT) * 100)}%` }} />
             </div>
             <p className="text-xs text-gray-400">Réinitialisation le 1er du mois</p>
           </div>
@@ -71,16 +73,13 @@ export default function AccountPage() {
 
         {/* Premium CTA */}
         {!isPremium && (
-          <button
-            onClick={() => setShowPremium(true)}
-            className="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold py-5 rounded-2xl shadow-lg shadow-amber-500/20 transition-all hover:opacity-90 active:scale-[0.98]"
-          >
+          <button onClick={() => setShowPremium(true)} className="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold py-5 rounded-2xl shadow-lg shadow-amber-500/20 transition-all hover:opacity-90 active:scale-[0.98]">
             ⭐ Passer Premium
             <p className="text-xs font-normal opacity-80 mt-0.5">Scans illimités · Pantry · Planning · Courses</p>
           </button>
         )}
 
-        {/* Settings */}
+        {/* Menu */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <MenuItem icon="📸" label="Scanner" href="/scan" />
           <MenuItem icon="📦" label="Mon Pantry" href="/pantry" premium={!isPremium} />
@@ -89,20 +88,12 @@ export default function AccountPage() {
           <MenuItem icon="📋" label="Historique" href="/history" premium={!isPremium} />
         </div>
 
-        {/* Sign out */}
-        <button
-          onClick={signOut}
-          disabled={loggingOut}
-          className="w-full bg-white text-red-500 font-semibold py-4 rounded-2xl border border-gray-100 shadow-sm hover:bg-red-50 transition-colors disabled:opacity-60"
-        >
-          {loggingOut ? 'Déconnexion…' : 'Se déconnecter'}
+        <button onClick={signOut} disabled={loggingOut} className="w-full bg-white text-red-500 font-semibold py-4 rounded-2xl border border-gray-100 shadow-sm hover:bg-red-50 transition-colors disabled:opacity-60">
+          {loggingOut ? 'Déconnexion…' : isDemo ? 'Quitter le mode démo' : 'Se déconnecter'}
         </button>
 
-        <p className="text-center text-gray-400 text-xs pb-2">
-          FrigoChef V2 · <span className="text-green-500">●</span> Actif
-        </p>
+        <p className="text-center text-gray-400 text-xs pb-2">FrigoChef V2 · <span className="text-green-500">●</span> Actif</p>
       </main>
-
       {showPremium && <PremiumModal onClose={() => setShowPremium(false)} />}
     </div>
   )
