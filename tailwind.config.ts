@@ -16,6 +16,8 @@ const config: Config = {
         'slide-up': 'slideUp 0.4s ease-out both',
         'scale-in': 'scaleIn 0.3s ease-out both',
         'spin-slow': 'spin 1.2s linear infinite',
+        'marquee': 'marquee 35s linear infinite',
+        'marquee-reverse': 'marqueeReverse 28s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -29,6 +31,14 @@ const config: Config = {
         scaleIn: {
           '0%': { opacity: '0', transform: 'scale(0.95)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        marqueeReverse: {
+          '0%': { transform: 'translateX(-50%)' },
+          '100%': { transform: 'translateX(0)' },
         },
       },
     },
