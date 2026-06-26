@@ -3,7 +3,7 @@ import Link from 'next/link'
 const RECIPE_CARDS = [
   { name: 'Pasta Carbonara', time: '20 min', cal: '650 kcal', img: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&h=280&fit=crop&q=80' },
   { name: 'Salade Niçoise', time: '15 min', cal: '320 kcal', img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=280&fit=crop&q=80' },
-  { name: 'Poulet Rôti', time: '45 min', cal: '520 kcal', img: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c7?w=400&h=280&fit=crop&q=80' },
+  { name: 'Poulet Rôti', time: '45 min', cal: '520 kcal', img: 'https://images.unsplash.com/photo-1569982175971-d92b01cf8694?w=400&h=280&fit=crop&q=80' },
   { name: 'Pizza Margherita', time: '30 min', cal: '680 kcal', img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=280&fit=crop&q=80' },
   { name: 'Saumon Grillé', time: '20 min', cal: '420 kcal', img: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=280&fit=crop&q=80' },
   { name: 'Risotto Champignons', time: '35 min', cal: '480 kcal', img: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=280&fit=crop&q=80' },
