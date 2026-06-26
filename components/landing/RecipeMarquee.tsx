@@ -2,15 +2,18 @@
 
 import { useState } from 'react'
 
-// Each recipe has a primary + backup image ID from Unsplash
-// If both fail → card is hidden entirely (no emoji placeholder)
+// 8 plats fixes dans cet ordre exact
+// Chaque plat a jusqu'à 4 images à essayer en cascade
+// Si toutes échouent → placeholder neutre gris (pas d'emoji)
 const RECIPES = [
   {
     name: 'Soupe de Légumes',
     time: '25 min', cal: '180 kcal',
     imgs: [
       'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=280&fit=crop&q=80',
       'https://images.unsplash.com/photo-1571167366136-b57e97e59cb5?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1604130735765-00f43a1b42b3?w=400&h=280&fit=crop&q=80',
     ],
   },
   {
@@ -19,6 +22,8 @@ const RECIPES = [
     imgs: [
       'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&h=280&fit=crop&q=80',
       'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1608219992759-8d74ed8d76eb?w=400&h=280&fit=crop&q=80',
     ],
   },
   {
@@ -26,7 +31,9 @@ const RECIPES = [
     time: '50 min', cal: '560 kcal',
     imgs: [
       'https://images.unsplash.com/photo-1574631895951-ef1e76ec70e2?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1610574082469-0ade9ce5a44f?w=400&h=280&fit=crop&q=80',
       'https://images.unsplash.com/photo-1543339520-8e7db60c62b4?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1558030137-a56c1b002d7d?w=400&h=280&fit=crop&q=80',
     ],
   },
   {
@@ -34,6 +41,8 @@ const RECIPES = [
     time: '20 min', cal: '650 kcal',
     imgs: [
       'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&h=280&fit=crop&q=80',
       'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&h=280&fit=crop&q=80',
     ],
   },
@@ -42,7 +51,9 @@ const RECIPES = [
     time: '15 min', cal: '320 kcal',
     imgs: [
       'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1607532941433-304659e8198a?w=400&h=280&fit=crop&q=80',
       'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=280&fit=crop&q=80',
     ],
   },
   {
@@ -51,6 +62,8 @@ const RECIPES = [
     imgs: [
       'https://images.unsplash.com/photo-1510130387422-82bed34b37e9?w=400&h=280&fit=crop&q=80',
       'https://images.unsplash.com/photo-1569058242567-93de6f36f8eb?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=280&fit=crop&q=80',
     ],
   },
   {
@@ -58,7 +71,9 @@ const RECIPES = [
     time: '30 min', cal: '680 kcal',
     imgs: [
       'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=280&fit=crop&q=80',
       'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1528137871618-79d2761e3fd5?w=400&h=280&fit=crop&q=80',
     ],
   },
   {
@@ -66,45 +81,49 @@ const RECIPES = [
     time: '20 min', cal: '450 kcal',
     imgs: [
       'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1485921325833-c519f76c4927?w=400&h=280&fit=crop&q=80',
       'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1541529086526-db283c563270?w=400&h=280&fit=crop&q=80',
     ],
   },
 ]
 
 function RecipeCard({ recipe }: { recipe: typeof RECIPES[0] }) {
   const [attempt, setAttempt] = useState(0)
-  const [hidden, setHidden] = useState(false)
-
-  if (hidden) return null
-
-  const src = recipe.imgs[attempt]
+  const [allFailed, setAllFailed] = useState(false)
 
   function onError() {
     if (attempt < recipe.imgs.length - 1) {
-      setAttempt(attempt + 1)
+      setAttempt(a => a + 1)
     } else {
-      setHidden(true)
+      setAllFailed(true)
     }
   }
 
   return (
-    <div className="shrink-0 w-52 bg-white rounded-2xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)] border border-gray-100">
-      <div className="relative h-32 overflow-hidden bg-gray-100">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          key={src}
-          src={src}
-          alt={recipe.name}
-          className="w-full h-full object-cover"
-          onError={onError}
-          loading="lazy"
-        />
+    <div className="shrink-0 w-48 sm:w-52 bg-white rounded-2xl overflow-hidden shadow-[0_2px_16px_rgba(0,0,0,0.07)] border border-gray-100">
+      <div className="relative h-32 overflow-hidden">
+        {allFailed ? (
+          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+            <span className="text-gray-300 text-xs">Image non disponible</span>
+          </div>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={attempt}
+            src={recipe.imgs[attempt]}
+            alt={recipe.name}
+            className="w-full h-full object-cover"
+            onError={onError}
+            loading="lazy"
+          />
+        )}
       </div>
       <div className="p-3.5">
         <p className="font-bold text-gray-900 text-sm truncate mb-2">{recipe.name}</p>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">⏱ {recipe.time}</span>
-          <span className="text-[11px] text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">🔥 {recipe.cal}</span>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-[11px] text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100 whitespace-nowrap">⏱ {recipe.time}</span>
+          <span className="text-[11px] text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100 whitespace-nowrap">🔥 {recipe.cal}</span>
         </div>
       </div>
     </div>
@@ -112,10 +131,11 @@ function RecipeCard({ recipe }: { recipe: typeof RECIPES[0] }) {
 }
 
 export default function RecipeMarquee() {
+  // Duplicate once for seamless infinite loop
   const doubled = [...RECIPES, ...RECIPES]
   return (
-    <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
-      <div className="flex gap-4 animate-marquee w-max py-2 px-4">
+    <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]">
+      <div className="flex gap-3 animate-marquee w-max py-2 px-4">
         {doubled.map((r, i) => (
           <RecipeCard key={i} recipe={r} />
         ))}
