@@ -1,16 +1,56 @@
 import Link from 'next/link'
 
 const RECIPE_CARDS = [
-  { name: 'Pasta Carbonara', time: '20 min', cal: '650 kcal', emoji: '🍝', bg: 'from-orange-400 to-amber-500' },
-  { name: 'Salade Caprese', time: '10 min', cal: '320 kcal', emoji: '🥗', bg: 'from-green-400 to-emerald-500' },
-  { name: 'Poulet Rôti', time: '45 min', cal: '520 kcal', emoji: '🍗', bg: 'from-yellow-400 to-orange-400' },
-  { name: 'Soupe Tomates', time: '25 min', cal: '180 kcal', emoji: '🥣', bg: 'from-red-400 to-rose-500' },
-  { name: 'Pizza Maison', time: '30 min', cal: '680 kcal', emoji: '🍕', bg: 'from-red-400 to-rose-400' },
-  { name: 'Risotto Champignons', time: '35 min', cal: '480 kcal', emoji: '🍄', bg: 'from-amber-400 to-yellow-500' },
-  { name: 'Saumon Teriyaki', time: '20 min', cal: '420 kcal', emoji: '🐟', bg: 'from-blue-400 to-cyan-500' },
-  { name: 'Tarte aux Pommes', time: '40 min', cal: '380 kcal', emoji: '🥧', bg: 'from-amber-300 to-orange-400' },
-  { name: 'Omelette Provençale', time: '15 min', cal: '410 kcal', emoji: '🍳', bg: 'from-yellow-300 to-amber-400' },
-  { name: 'Gratin Dauphinois', time: '50 min', cal: '560 kcal', emoji: '🧀', bg: 'from-orange-300 to-yellow-400' },
+  {
+    name: 'Pasta Carbonara',
+    time: '20 min', cal: '650 kcal',
+    img: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=280&fit=crop&q=80',
+  },
+  {
+    name: 'Salade Niçoise',
+    time: '15 min', cal: '320 kcal',
+    img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=280&fit=crop&q=80',
+  },
+  {
+    name: 'Poulet Rôti',
+    time: '45 min', cal: '520 kcal',
+    img: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c7?w=400&h=280&fit=crop&q=80',
+  },
+  {
+    name: 'Pizza Margherita',
+    time: '30 min', cal: '680 kcal',
+    img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=280&fit=crop&q=80',
+  },
+  {
+    name: 'Saumon Grillé',
+    time: '20 min', cal: '420 kcal',
+    img: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=280&fit=crop&q=80',
+  },
+  {
+    name: 'Risotto Champignons',
+    time: '35 min', cal: '480 kcal',
+    img: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=280&fit=crop&q=80',
+  },
+  {
+    name: 'Tarte aux Pommes',
+    time: '40 min', cal: '380 kcal',
+    img: 'https://images.unsplash.com/photo-1568571780742-312dc3caef4b?w=400&h=280&fit=crop&q=80',
+  },
+  {
+    name: 'Soupe de Légumes',
+    time: '25 min', cal: '180 kcal',
+    img: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=280&fit=crop&q=80',
+  },
+  {
+    name: 'Omelette Provençale',
+    time: '15 min', cal: '410 kcal',
+    img: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&h=280&fit=crop&q=80',
+  },
+  {
+    name: 'Gratin Dauphinois',
+    time: '50 min', cal: '560 kcal',
+    img: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&h=280&fit=crop&q=80',
+  },
 ]
 
 const CATEGORIES = [
@@ -30,7 +70,7 @@ const CATEGORIES = [
 
 const FEATURES = [
   { emoji: '📦', title: 'Pantry intelligent', desc: 'Gérez vos stocks et recevez des alertes avant péremption' },
-  { emoji: '📅', title: 'Planning hebdomadaire IA', desc: "L'IA génère votre semaine de repas en un clic" },
+  { emoji: '📅', title: 'Planning hebdomadaire', desc: "L'IA génère votre semaine de repas en un clic" },
   { emoji: '🛒', title: 'Liste de courses auto', desc: 'Générée automatiquement depuis votre planning' },
   { emoji: '♻️', title: 'Anti-gaspillage', desc: 'Priorité aux aliments à utiliser en urgence' },
   { emoji: '💰', title: 'Économies réelles', desc: 'Réduisez vos courses et évitez les déchets' },
@@ -41,13 +81,13 @@ export default function LandingPage() {
   return (
     <div className="bg-[#0B0B0B]">
       {/* Header */}
-      <header className="px-6 pt-8 pb-2 sticky top-0 z-50 bg-[#0B0B0B]/90 backdrop-blur-sm border-b border-white/5">
+      <header className="px-6 pt-8 pb-4 sticky top-0 z-50 bg-[#0B0B0B]/90 backdrop-blur-sm border-b border-white/5">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <span className="text-white font-bold text-xl tracking-tight">
             Frigo<span className="text-green-400">Chef</span>
           </span>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">
+            <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block">
               Connexion
             </Link>
             <Link href="/scan" className="bg-green-500 hover:bg-green-400 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
@@ -61,10 +101,6 @@ export default function LandingPage() {
       <section className="relative overflow-hidden py-24 px-6">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(34,197,94,0.2),transparent)]" />
         <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full border border-white/10 bg-white/[0.06] text-sm text-gray-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            Assistant culinaire IA — GPT-4o Vision
-          </div>
           <h1 className="text-6xl sm:text-7xl font-black text-white tracking-tight leading-[1.04] mb-5">
             Ouvre ton frigo.
           </h1>
@@ -74,7 +110,7 @@ export default function LandingPage() {
             </span>
           </h2>
           <p className="text-gray-500 max-w-md mx-auto text-lg leading-relaxed mb-12">
-            Une photo suffit. L&apos;IA détecte vos ingrédients et génère 5 recettes personnalisées en quelques secondes.
+            Prenez une photo de vos ingrédients. Notre IA détecte ce que vous avez et génère 5 recettes adaptées en quelques secondes.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/scan" className="inline-flex items-center justify-center gap-3 bg-green-500 hover:bg-green-400 active:scale-95 text-white text-lg font-bold px-10 py-5 rounded-2xl shadow-lg shadow-green-500/30 transition-all">
@@ -89,7 +125,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Light content section */}
+      {/* Light section */}
       <div className="bg-[#F8F9FA] rounded-t-[3rem] overflow-hidden">
 
         {/* How it works */}
@@ -101,11 +137,11 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {[
               { step: '01', emoji: '📸', title: 'Photographiez', desc: 'Prenez une photo de votre frigo ou posez vos ingrédients sur le plan de travail' },
-              { step: '02', emoji: '🧠', title: "L'IA analyse", desc: "GPT-4o Vision identifie automatiquement chaque aliment visible dans la photo" },
-              { step: '03', emoji: '🍽️', title: '5 recettes générées', desc: "Recevez 5 recettes adaptées à vos ingrédients, avec temps et calories" },
+              { step: '02', emoji: '🧠', title: "L'IA analyse", desc: "Notre intelligence artificielle identifie automatiquement chaque aliment visible" },
+              { step: '03', emoji: '🍽️', title: '5 recettes générées', desc: "Recevez 5 recettes personnalisées adaptées à vos ingrédients, avec temps et calories" },
             ].map(({ step, emoji, title, desc }) => (
               <div key={step} className="bg-white rounded-3xl p-7 shadow-sm border border-gray-100 text-center relative overflow-hidden">
-                <div className="absolute top-4 right-4 text-xs font-black text-gray-100">{step}</div>
+                <div className="absolute top-4 right-5 text-4xl font-black text-gray-50">{step}</div>
                 <div className="text-4xl mb-4">{emoji}</div>
                 <h3 className="font-black text-gray-900 text-lg mb-2">{title}</h3>
                 <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
@@ -114,24 +150,30 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Marquee 1 — Recettes */}
+        {/* Marquee 1 — Recettes avec vraies photos */}
         <section className="pb-4">
           <div className="text-center mb-6 px-6">
-            <h2 className="text-2xl font-black text-gray-900 mb-1">Recettes générées chaque jour</h2>
-            <p className="text-gray-400 text-sm">Des milliers de recettes créées par notre communauté</p>
+            <h2 className="text-2xl font-black text-gray-900 mb-1">Des recettes qui donnent l&apos;eau à la bouche</h2>
+            <p className="text-gray-400 text-sm">Générées automatiquement à partir de vos ingrédients</p>
           </div>
           <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-            <div className="flex gap-4 animate-marquee w-max py-2 px-4">
+            <div className="flex gap-4 animate-marquee w-max py-3 px-4">
               {[...RECIPE_CARDS, ...RECIPE_CARDS].map((r, i) => (
-                <div key={i} className="shrink-0 w-44 bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-                  <div className={`h-24 bg-gradient-to-br ${r.bg} flex items-center justify-center`}>
-                    <span className="text-5xl">{r.emoji}</span>
+                <div key={i} className="shrink-0 w-52 bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="relative h-32 overflow-hidden bg-gray-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={r.img}
+                      alt={r.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
                   </div>
-                  <div className="p-3">
-                    <p className="font-bold text-gray-900 text-xs truncate">{r.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] text-gray-400">⏱ {r.time}</span>
-                      <span className="text-[10px] text-gray-400">🔥 {r.cal}</span>
+                  <div className="p-3.5">
+                    <p className="font-bold text-gray-900 text-sm truncate">{r.name}</p>
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <span className="text-[11px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">⏱ {r.time}</span>
+                      <span className="text-[11px] text-orange-400 bg-orange-50 px-2 py-0.5 rounded-full">🔥 {r.cal}</span>
                     </div>
                   </div>
                 </div>
@@ -171,13 +213,13 @@ export default function LandingPage() {
         </section>
 
         {/* Stats banner */}
-        <section className="mx-6 mb-16">
+        <section className="px-6 mb-16">
           <div className="bg-gray-900 rounded-3xl p-10 max-w-5xl mx-auto">
             <div className="grid grid-cols-3 gap-6 text-center">
               {[
-                { value: '5 sec', label: "Temps d'analyse IA" },
-                { value: '5 recettes', label: 'Générées à chaque scan' },
-                { value: '18€', label: 'Économisés par mois' },
+                { value: '5 sec', label: "Temps d'analyse" },
+                { value: '5 recettes', label: 'Par scan' },
+                { value: '18€', label: 'Économisés/mois' },
               ].map(({ value, label }) => (
                 <div key={label}>
                   <p className="text-2xl sm:text-3xl font-black text-green-400">{value}</p>
@@ -188,27 +230,18 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Marquee 3 — Features scroll */}
-        <section className="py-6 bg-white border-y border-gray-100">
+        {/* Marquee 3 — Features texte */}
+        <section className="py-5 bg-white border-y border-gray-100">
           <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
             <div className="flex gap-8 animate-marquee w-max px-8">
-              {[...Array(2)].flatMap(() => [
-                '📸 Scan en 1 photo',
-                '🧠 GPT-4o Vision',
-                '🍽️ 5 recettes instantanées',
-                '📦 Pantry intelligent',
-                '📅 Planning IA',
-                '🛒 Liste de courses auto',
-                '♻️ Anti-gaspillage',
-                '💰 Économies réelles',
-                '🔒 Vos données privées',
-                '⚡ Résultats en 5 secondes',
-              ].map((text, i) => (
-                <span key={i} className="shrink-0 flex items-center gap-2 text-sm font-semibold text-gray-600 whitespace-nowrap">
-                  {text}
-                  <span className="text-gray-200 ml-4">·</span>
-                </span>
-              )))}
+              {[...Array(2)].flatMap((_, ri) =>
+                ['📸 Scan en 1 photo', '🧠 Détection IA', '🍽️ 5 recettes instantanées', '📦 Pantry intelligent', '📅 Planning automatique', '🛒 Liste de courses auto', '♻️ Anti-gaspillage', '💰 Économies réelles', '⚡ Résultats en 5 secondes', '🔒 Vos données privées'].map((text, i) => (
+                  <span key={`${ri}-${i}`} className="shrink-0 flex items-center gap-3 text-sm font-semibold text-gray-500 whitespace-nowrap">
+                    {text}
+                    <span className="text-gray-200">·</span>
+                  </span>
+                ))
+              )}
             </div>
           </div>
         </section>
@@ -217,7 +250,7 @@ export default function LandingPage() {
         <section className="text-center py-24 px-6">
           <h2 className="text-4xl font-black text-gray-900 mb-4">Prêt à cuisiner mieux ?</h2>
           <p className="text-gray-400 mb-10 max-w-md mx-auto">
-            Rejoignez des milliers d&apos;utilisateurs qui gèrent mieux leur frigo et économisent chaque semaine.
+            Transformez n&apos;importe quoi dans votre frigo en un repas délicieux. En quelques secondes.
           </p>
           <Link href="/scan" className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-400 text-white font-bold px-10 py-5 rounded-2xl shadow-lg shadow-green-500/25 transition-all text-lg">
             <CameraIcon />
