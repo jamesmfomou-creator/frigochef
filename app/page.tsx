@@ -1,17 +1,5 @@
 import Link from 'next/link'
-
-const RECIPE_CARDS = [
-  { name: 'Pasta Carbonara', time: '20 min', cal: '650 kcal', img: 'https://source.unsplash.com/400x280/?carbonara,pasta,cream&sig=1' },
-  { name: 'Salade Niçoise', time: '15 min', cal: '320 kcal', img: 'https://source.unsplash.com/400x280/?nicoise,salad,tuna&sig=2' },
-  { name: 'Poulet Rôti', time: '45 min', cal: '520 kcal', img: 'https://source.unsplash.com/400x280/?roasted,chicken,whole&sig=3' },
-  { name: 'Pizza Margherita', time: '30 min', cal: '680 kcal', img: 'https://source.unsplash.com/400x280/?pizza,margherita,mozzarella&sig=4' },
-  { name: 'Saumon Grillé', time: '20 min', cal: '420 kcal', img: 'https://source.unsplash.com/400x280/?grilled,salmon,fillet&sig=5' },
-  { name: 'Risotto Champignons', time: '35 min', cal: '480 kcal', img: 'https://source.unsplash.com/400x280/?risotto,mushroom,creamy&sig=6' },
-  { name: 'Tarte aux Pommes', time: '40 min', cal: '380 kcal', img: 'https://source.unsplash.com/400x280/?apple,tart,pastry&sig=7' },
-  { name: 'Soupe de Légumes', time: '25 min', cal: '180 kcal', img: 'https://source.unsplash.com/400x280/?vegetable,soup,bowl&sig=8' },
-  { name: 'Omelette Provençale', time: '15 min', cal: '410 kcal', img: 'https://source.unsplash.com/400x280/?omelette,eggs,herbs&sig=9' },
-  { name: 'Gratin Dauphinois', time: '50 min', cal: '560 kcal', img: 'https://source.unsplash.com/400x280/?potato,gratin,cheese&sig=10' },
-]
+import RecipeMarquee from '@/components/landing/RecipeMarquee'
 
 const CATEGORIES = [
   { name: 'Végétarien', bg: 'bg-green-100 text-green-700', emoji: '🥗' },
@@ -105,25 +93,7 @@ export default function LandingPage() {
             <p className="text-green-600 text-xs font-bold uppercase tracking-widest mb-2">Inspiration</p>
             <h2 className="text-2xl font-black text-gray-900">Des recettes qui donnent l&apos;eau à la bouche</h2>
           </div>
-          <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
-            <div className="flex gap-4 animate-marquee w-max py-2 px-4">
-              {[...RECIPE_CARDS, ...RECIPE_CARDS].map((r, i) => (
-                <div key={i} className="shrink-0 w-52 bg-white rounded-2xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)] border border-gray-100">
-                  <div className="relative h-32 overflow-hidden bg-gray-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={r.img} alt={r.name} className="w-full h-full object-cover" loading="lazy" />
-                  </div>
-                  <div className="p-3.5">
-                    <p className="font-bold text-gray-900 text-sm truncate mb-2">{r.name}</p>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">⏱ {r.time}</span>
-                      <span className="text-[11px] text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">🔥 {r.cal}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <RecipeMarquee />
         </section>
 
         {/* Marquee 2 — Catégories */}
