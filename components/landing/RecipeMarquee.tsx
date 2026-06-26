@@ -2,39 +2,103 @@
 
 import { useState } from 'react'
 
+// Each recipe has a primary + backup image ID from Unsplash
+// If both fail → card is hidden entirely (no emoji placeholder)
 const RECIPES = [
-  { name: 'Pasta Carbonara', time: '20 min', cal: '650 kcal', img: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&h=280&fit=crop&q=80', emoji: '🍝', bg: 'from-orange-400 to-amber-500' },
-  { name: 'Salade Niçoise', time: '15 min', cal: '320 kcal', img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&h=280&fit=crop&q=80', emoji: '🥗', bg: 'from-green-400 to-emerald-500' },
-  { name: 'Poulet Rôti', time: '45 min', cal: '520 kcal', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=280&fit=crop&q=80', emoji: '🍗', bg: 'from-yellow-400 to-orange-400' },
-  { name: 'Pizza Margherita', time: '30 min', cal: '680 kcal', img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=280&fit=crop&q=80', emoji: '🍕', bg: 'from-red-400 to-rose-500' },
-  { name: 'Saumon Grillé', time: '20 min', cal: '420 kcal', img: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=280&fit=crop&q=80', emoji: '🐟', bg: 'from-blue-400 to-cyan-500' },
-  { name: 'Risotto Champignons', time: '35 min', cal: '480 kcal', img: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=280&fit=crop&q=80', emoji: '🍄', bg: 'from-amber-400 to-yellow-500' },
-  { name: 'Tarte aux Pommes', time: '40 min', cal: '380 kcal', img: 'https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?w=400&h=280&fit=crop&q=80', emoji: '🥧', bg: 'from-amber-300 to-orange-400' },
-  { name: 'Soupe de Légumes', time: '25 min', cal: '180 kcal', img: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=280&fit=crop&q=80', emoji: '🥣', bg: 'from-green-300 to-teal-400' },
-  { name: 'Omelette Provençale', time: '15 min', cal: '410 kcal', img: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&h=280&fit=crop&q=80', emoji: '🍳', bg: 'from-yellow-300 to-amber-400' },
-  { name: 'Gratin Dauphinois', time: '50 min', cal: '560 kcal', img: 'https://images.unsplash.com/photo-1558030137-a56c1b002d7d?w=400&h=280&fit=crop&q=80', emoji: '🧀', bg: 'from-orange-300 to-yellow-400' },
+  {
+    name: 'Soupe de Légumes',
+    time: '25 min', cal: '180 kcal',
+    imgs: [
+      'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1571167366136-b57e97e59cb5?w=400&h=280&fit=crop&q=80',
+    ],
+  },
+  {
+    name: 'Omelette Provençale',
+    time: '15 min', cal: '410 kcal',
+    imgs: [
+      'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&h=280&fit=crop&q=80',
+    ],
+  },
+  {
+    name: 'Gratin Dauphinois',
+    time: '50 min', cal: '560 kcal',
+    imgs: [
+      'https://images.unsplash.com/photo-1574631895951-ef1e76ec70e2?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1543339520-8e7db60c62b4?w=400&h=280&fit=crop&q=80',
+    ],
+  },
+  {
+    name: 'Pasta Carbonara',
+    time: '20 min', cal: '650 kcal',
+    imgs: [
+      'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&h=280&fit=crop&q=80',
+    ],
+  },
+  {
+    name: 'Salade Niçoise',
+    time: '15 min', cal: '320 kcal',
+    imgs: [
+      'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=280&fit=crop&q=80',
+    ],
+  },
+  {
+    name: 'Poulet Rôti',
+    time: '45 min', cal: '520 kcal',
+    imgs: [
+      'https://images.unsplash.com/photo-1510130387422-82bed34b37e9?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1569058242567-93de6f36f8eb?w=400&h=280&fit=crop&q=80',
+    ],
+  },
+  {
+    name: 'Pizza Margherita',
+    time: '30 min', cal: '680 kcal',
+    imgs: [
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&h=280&fit=crop&q=80',
+    ],
+  },
+  {
+    name: 'Saumon au Four',
+    time: '20 min', cal: '450 kcal',
+    imgs: [
+      'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&h=280&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=280&fit=crop&q=80',
+    ],
+  },
 ]
 
 function RecipeCard({ recipe }: { recipe: typeof RECIPES[0] }) {
-  const [error, setError] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+  const [hidden, setHidden] = useState(false)
+
+  if (hidden) return null
+
+  const src = recipe.imgs[attempt]
+
+  function onError() {
+    if (attempt < recipe.imgs.length - 1) {
+      setAttempt(attempt + 1)
+    } else {
+      setHidden(true)
+    }
+  }
 
   return (
     <div className="shrink-0 w-52 bg-white rounded-2xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)] border border-gray-100">
       <div className="relative h-32 overflow-hidden bg-gray-100">
-        {!error ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={recipe.img}
-            alt={recipe.name}
-            className="w-full h-full object-cover"
-            onError={() => setError(true)}
-            loading="lazy"
-          />
-        ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${recipe.bg} flex items-center justify-center`}>
-            <span className="text-5xl drop-shadow">{recipe.emoji}</span>
-          </div>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          key={src}
+          src={src}
+          alt={recipe.name}
+          className="w-full h-full object-cover"
+          onError={onError}
+          loading="lazy"
+        />
       </div>
       <div className="p-3.5">
         <p className="font-bold text-gray-900 text-sm truncate mb-2">{recipe.name}</p>
