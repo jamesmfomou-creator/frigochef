@@ -6,17 +6,35 @@ import Link from 'next/link'
 import { Recipe, Ingredient } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
 
-const FALLBACKS = [
-  { gradient: 'from-green-400 to-emerald-600', emoji: '🥗' },
-  { gradient: 'from-orange-400 to-amber-500', emoji: '🍳' },
-  { gradient: 'from-red-400 to-rose-500', emoji: '🍕' },
-  { gradient: 'from-yellow-400 to-orange-400', emoji: '🥘' },
-  { gradient: 'from-violet-400 to-purple-600', emoji: '🫕' },
+// Pool de belles photos food fiables (IDs Unsplash vérifiés)
+const FOOD_POOL = [
+  'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&h=500&fit=crop&q=85', // pizza
+  'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=800&h=500&fit=crop&q=85', // pasta carbonara
+  'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&h=500&fit=crop&q=85', // saumon
+  'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&h=500&fit=crop&q=85', // salade colorée
+  'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=800&h=500&fit=crop&q=85', // riz/risotto
+  'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=500&fit=crop&q=85', // salade verte
+  'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=800&h=500&fit=crop&q=85', // pâtes
+  'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=800&h=500&fit=crop&q=85', // viande
 ]
 
-function imgUrl(title: string, index: number) {
-  const q = title.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, '').trim().split(/\s+/).slice(0, 3).join(',')
-  return `https://source.unsplash.com/featured/800x500/?food,${q}&sig=${index}`
+// Correspondance par mots-clés → image spécifique
+function imgUrl(title: string, index: number): string {
+  const t = title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  if (t.includes('pizza')) return FOOD_POOL[0]
+  if (t.includes('pasta') || t.includes('pate') || t.includes('carbonara') || t.includes('spaghetti') || t.includes('tagliatelle')) return FOOD_POOL[1]
+  if (t.includes('saumon') || t.includes('salmon') || t.includes('poisson') || t.includes('truite')) return FOOD_POOL[2]
+  if (t.includes('salade') || t.includes('nicoise') || t.includes('cesar')) return FOOD_POOL[3]
+  if (t.includes('risotto')) return FOOD_POOL[4]
+  if (t.includes('soupe') || t.includes('potage') || t.includes('veloute')) return 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800&h=500&fit=crop&q=85'
+  if (t.includes('poulet') || t.includes('chicken') || t.includes('roti')) return 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=800&h=500&fit=crop&q=85'
+  if (t.includes('gratin')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Gratin_dauphinois_02.jpg/800px-Gratin_dauphinois_02.jpg'
+  if (t.includes('omelette')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Omelet.jpg/800px-Omelet.jpg'
+  if (t.includes('tarte') || t.includes('quiche')) return 'https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?w=800&h=500&fit=crop&q=85'
+  if (t.includes('burger') || t.includes('sandwich')) return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=500&fit=crop&q=85'
+  if (t.includes('curry') || t.includes('indien')) return 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&h=500&fit=crop&q=85'
+  // Photo générique food selon l'index
+  return FOOD_POOL[index % FOOD_POOL.length]
 }
 
 export default function RecipesPage() {
@@ -86,21 +104,28 @@ export default function RecipesPage() {
 
 function RecipeCard({ recipe, index, onOpen }: { recipe: Recipe; index: number; onOpen: () => void }) {
   const [loaded, setLoaded] = useState(false)
-  const [error, setError] = useState(false)
-  const fb = FALLBACKS[index % FALLBACKS.length]
+  const [attempt, setAttempt] = useState(0)
+
+  // Si l'image principale échoue → fallback generic food photo
+  const sources = [imgUrl(recipe.title, index), FOOD_POOL[(index + 2) % FOOD_POOL.length]]
+  const src = sources[Math.min(attempt, sources.length - 1)]
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md active:scale-[0.99] transition-all duration-300 cursor-pointer animate-slide-up" style={{ animationDelay: `${index * 0.07}s` }} onClick={onOpen}>
       <div className="relative h-52 overflow-hidden bg-gray-100">
-        {!error ? (
-          <>
-            {!loaded && <div className="absolute inset-0 skeleton" />}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imgUrl(recipe.title, index)} alt={recipe.title} onLoad={() => setLoaded(true)} onError={() => setError(true)} className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`} loading="lazy" />
-          </>
-        ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${fb.gradient} flex items-center justify-center`}><span className="text-7xl drop-shadow">{fb.emoji}</span></div>
-        )}
+        <>
+          {!loaded && <div className="absolute inset-0 skeleton" />}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={src}
+            src={src}
+            alt={recipe.title}
+            onLoad={() => setLoaded(true)}
+            onError={() => { setLoaded(false); setAttempt(a => a + 1) }}
+            className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+            loading="lazy"
+          />
+        </>
         <div className="absolute top-3 right-3 flex gap-1.5">
           <span className="flex items-center gap-1 bg-black/50 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-full">⏱ {recipe.time}</span>
           {recipe.calories && <span className="flex items-center gap-1 bg-black/50 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-full">🔥 {recipe.calories}</span>}
@@ -127,21 +152,26 @@ function RecipeCard({ recipe, index, onOpen }: { recipe: Recipe; index: number; 
 
 function RecipeModal({ recipe, index, onClose }: { recipe: Recipe; index: number; onClose: () => void }) {
   const [loaded, setLoaded] = useState(false)
-  const [error, setError] = useState(false)
-  const fb = FALLBACKS[index % FALLBACKS.length]
+  const [attempt, setAttempt] = useState(0)
+
+  const sources = [imgUrl(recipe.title, index), FOOD_POOL[(index + 3) % FOOD_POOL.length]]
+  const src = sources[Math.min(attempt, sources.length - 1)]
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center animate-fade-in">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-[6px]" onClick={onClose} />
       <div className="relative w-full max-w-lg max-h-[94vh] bg-white rounded-t-[2rem] sm:rounded-[2rem] overflow-hidden flex flex-col shadow-2xl animate-slide-up">
-        <div className="relative h-56 shrink-0 overflow-hidden bg-gray-100">
-          {!error ? (
-            <>{!loaded && <div className="absolute inset-0 skeleton" />}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imgUrl(recipe.title, index)} alt={recipe.title} onLoad={() => setLoaded(true)} onError={() => setError(true)} className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`} /></>
-          ) : (
-            <div className={`w-full h-full bg-gradient-to-br ${fb.gradient} flex items-center justify-center`}><span className="text-8xl drop-shadow">{fb.emoji}</span></div>
-          )}
+        <div className="relative h-56 shrink-0 overflow-hidden bg-gray-900">
+          {!loaded && <div className="absolute inset-0 skeleton" />}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={src}
+            src={src}
+            alt={recipe.title}
+            onLoad={() => setLoaded(true)}
+            onError={() => { setLoaded(false); setAttempt(a => a + 1) }}
+            className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           <button onClick={onClose} className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full transition-colors">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
