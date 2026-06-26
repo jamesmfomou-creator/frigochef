@@ -1,15 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { safeCreateClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
-  const supabase = createClient()
+  const [error, setError] = useState<string | null>(null)
 
   async function signInWithGoogle() {
+    const supabase = safeCreateClient()
+    if (!supabase) { setError('Configuration Supabase manquante. Contactez le support.'); return }
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${location.origin}/auth/callback` },
@@ -19,6 +21,8 @@ export default function LoginPage() {
   async function signInWithEmail(e: React.FormEvent) {
     e.preventDefault()
     if (!email) return
+    const supabase = safeCreateClient()
+    if (!supabase) { setError('Configuration Supabase manquante. Contactez le support.'); return }
     setLoading(true)
     await supabase.auth.signInWithOtp({
       email,
@@ -30,17 +34,21 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen bg-[#0B0B0B] flex flex-col items-center justify-center px-6">
-      {/* Glow */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(34,197,94,0.15),transparent)]" />
 
       <div className="relative z-10 w-full max-w-sm">
-        {/* Logo */}
         <div className="text-center mb-10">
           <span className="text-3xl font-black text-white tracking-tight">
             Frigo<span className="text-green-400">Chef</span>
           </span>
           <p className="text-gray-500 text-sm mt-2">Votre assistant culinaire IA</p>
         </div>
+
+        {error && (
+          <div className="mb-4 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-2xl px-4 py-3 text-center">
+            {error}
+          </div>
+        )}
 
         {sent ? (
           <div className="bg-white/[0.06] border border-white/10 rounded-3xl p-8 text-center animate-scale-in">
@@ -49,16 +57,12 @@ export default function LoginPage() {
             <p className="text-gray-400 text-sm">
               Un lien de connexion a été envoyé à <span className="text-white">{email}</span>
             </p>
-            <button
-              onClick={() => setSent(false)}
-              className="mt-6 text-gray-500 hover:text-gray-300 text-sm transition-colors"
-            >
+            <button onClick={() => setSent(false)} className="mt-6 text-gray-500 hover:text-gray-300 text-sm transition-colors">
               ← Retour
             </button>
           </div>
         ) : (
           <div className="space-y-4 animate-slide-up">
-            {/* Google */}
             <button
               onClick={signInWithGoogle}
               className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 active:scale-[0.98] text-gray-900 font-semibold py-4 rounded-2xl transition-all duration-200 shadow-lg"
@@ -67,14 +71,12 @@ export default function LoginPage() {
               Continuer avec Google
             </button>
 
-            {/* Divider */}
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-white/10" />
               <span className="text-gray-600 text-xs">ou</span>
               <div className="flex-1 h-px bg-white/10" />
             </div>
 
-            {/* Email */}
             <form onSubmit={signInWithEmail} className="space-y-3">
               <input
                 type="email"
@@ -82,12 +84,12 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="votre@email.com"
                 required
-                className="w-full bg-white/[0.07] border border-white/10 text-white placeholder-gray-600 rounded-2xl px-4 py-4 outline-none focus:border-green-500/50 focus:bg-white/[0.09] transition-all"
+                className="w-full bg-white/[0.07] border border-white/10 text-white placeholder-gray-600 rounded-2xl px-4 py-4 outline-none focus:border-green-500/50 transition-all"
               />
               <button
                 type="submit"
                 disabled={loading || !email}
-                className="w-full bg-green-500 hover:bg-green-400 active:scale-[0.98] disabled:opacity-50 text-white font-bold py-4 rounded-2xl transition-all duration-200 shadow-lg shadow-green-500/20"
+                className="w-full bg-green-500 hover:bg-green-400 active:scale-[0.98] disabled:opacity-50 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-green-500/20"
               >
                 {loading ? 'Envoi…' : 'Recevoir un lien de connexion'}
               </button>
