@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Profile, PantryItem, MealPlanDay, FREE_SCAN_LIMIT } from '@/lib/types'
 import PremiumModal from '@/components/premium/PremiumModal'
 
@@ -29,7 +30,18 @@ export default function DashboardClient({
   scansRemaining,
 }: Props) {
   const [showPremium, setShowPremium] = useState(false)
+  const [upgraded, setUpgraded] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const isPremium = profile?.plan === 'premium'
+
+  useEffect(() => {
+    if (searchParams.get('upgraded') === 'true') {
+      setUpgraded(true)
+      // Nettoie le paramètre URL sans recharger la page
+      router.replace('/dashboard', { scroll: false })
+    }
+  }, [searchParams, router])
   const firstName = profile?.name?.split(' ')[0] ?? 'vous'
   const estimatedSavings = Math.round(totalScans * 1.5)
 
@@ -231,6 +243,20 @@ export default function DashboardClient({
       </div>
 
       {showPremium && <PremiumModal onClose={() => setShowPremium(false)} />}
+
+      {/* Bannière succès paiement */}
+      {upgraded && (
+        <div className="fixed bottom-24 left-4 right-4 max-w-lg mx-auto bg-gray-900 text-white rounded-2xl px-5 py-4 flex items-center gap-3 shadow-2xl z-50 animate-slide-up">
+          <span className="text-2xl">⭐</span>
+          <div className="flex-1">
+            <p className="font-bold text-sm">Bienvenue en Premium !</p>
+            <p className="text-gray-400 text-xs">Toutes les fonctionnalités sont débloquées.</p>
+          </div>
+          <button onClick={() => setUpgraded(false)} className="text-gray-500 hover:text-gray-300 transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      )}
     </div>
   )
 }

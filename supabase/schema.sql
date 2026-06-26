@@ -12,8 +12,12 @@ create table public.profiles (
   plan text not null default 'free' check (plan in ('free', 'premium')),
   scan_count integer not null default 0,
   scan_reset_date date not null default current_date,
+  stripe_customer_id text,
   created_at timestamptz not null default now()
 );
+
+-- Si la table existe déjà, ajouter la colonne stripe
+-- alter table public.profiles add column if not exists stripe_customer_id text;
 alter table public.profiles enable row level security;
 create policy "Users can view own profile" on public.profiles for select using (auth.uid() = id);
 create policy "Users can update own profile" on public.profiles for update using (auth.uid() = id);
