@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
 import { Profile } from '@/lib/types'
 import ProfileProvider from '@/components/providers/ProfileProvider'
 import BottomNav from '@/components/navigation/BottomNav'
@@ -17,8 +16,14 @@ const DEMO_PROFILE: Profile = {
 }
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies()
-  const isDemo = cookieStore.get('frigochef_demo')?.value === 'true'
+  let cookieStore
+  try {
+    cookieStore = await cookies()
+  } catch {
+    redirect('/login')
+  }
+
+  const isDemo = cookieStore?.get('frigochef_demo')?.value === 'true'
 
   if (isDemo) {
     return (
@@ -29,16 +34,27 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     )
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let profile: Profile | null = null
 
-  if (!user) redirect('/login')
+  try {
+    const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single<Profile>()
+    if (!user) redirect('/login')
+
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single<Profile>()
+
+    profile = data
+  } catch (err) {
+    const e = err as { digest?: string }
+    if (e?.digest?.startsWith('NEXT_REDIRECT')) throw err
+    redirect('/login')
+  }
 
   return (
     <ProfileProvider profile={profile}>
