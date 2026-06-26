@@ -10,30 +10,30 @@ const RECIPES = [
     name: 'Soupe de Légumes',
     time: '25 min', cal: '180 kcal',
     imgs: [
-      'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=280&fit=crop&q=80',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Garden_vegetable_soup.jpg/400px-Garden_vegetable_soup.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Vegetable_soup_%28cropped%29.jpg/400px-Vegetable_soup_%28cropped%29.jpg',
       'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=280&fit=crop&q=80',
       'https://images.unsplash.com/photo-1571167366136-b57e97e59cb5?w=400&h=280&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1604130735765-00f43a1b42b3?w=400&h=280&fit=crop&q=80',
     ],
   },
   {
     name: 'Omelette Provençale',
     time: '15 min', cal: '410 kcal',
     imgs: [
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Omelet.jpg/400px-Omelet.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Omelette_Paysanne.jpg/400px-Omelette_Paysanne.jpg',
       'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&h=280&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&h=280&fit=crop&q=80',
       'https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=400&h=280&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1608219992759-8d74ed8d76eb?w=400&h=280&fit=crop&q=80',
     ],
   },
   {
     name: 'Gratin Dauphinois',
     time: '50 min', cal: '560 kcal',
     imgs: [
-      'https://images.unsplash.com/photo-1574631895951-ef1e76ec70e2?w=400&h=280&fit=crop&q=80',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Gratin_dauphinois_02.jpg/400px-Gratin_dauphinois_02.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/GratinDauph.jpg/400px-GratinDauph.jpg',
       'https://images.unsplash.com/photo-1610574082469-0ade9ce5a44f?w=400&h=280&fit=crop&q=80',
       'https://images.unsplash.com/photo-1543339520-8e7db60c62b4?w=400&h=280&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1558030137-a56c1b002d7d?w=400&h=280&fit=crop&q=80',
     ],
   },
   {
@@ -60,10 +60,10 @@ const RECIPES = [
     name: 'Poulet Rôti',
     time: '45 min', cal: '520 kcal',
     imgs: [
-      'https://images.unsplash.com/photo-1510130387422-82bed34b37e9?w=400&h=280&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1569058242567-93de6f36f8eb?w=400&h=280&fit=crop&q=80',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Poulet_R%C3%B4ti.jpg/400px-Poulet_R%C3%B4ti.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Whole_roast_chicken.jpg/400px-Whole_roast_chicken.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Roasted_chicken.jpg/400px-Roasted_chicken.jpg',
       'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=280&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=280&fit=crop&q=80',
     ],
   },
   {
