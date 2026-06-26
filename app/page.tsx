@@ -60,8 +60,17 @@ export default function LandingPage() {
       {/* Light content */}
       <div className="bg-white rounded-t-[3rem] overflow-hidden">
 
+        {/* Marquee recettes — EN PREMIER pour accrocher immédiatement */}
+        <section className="pt-10 pb-6">
+          <div className="text-center mb-6 px-6">
+            <p className="text-green-600 text-xs font-bold uppercase tracking-widest mb-1">Ce que vous pouvez cuisiner</p>
+            <h2 className="text-2xl font-black text-gray-900">Des recettes qui donnent l&apos;eau à la bouche</h2>
+          </div>
+          <RecipeMarquee />
+        </section>
+
         {/* How it works — compact */}
-        <section className="max-w-5xl mx-auto px-6 pt-16 pb-12">
+        <section className="max-w-5xl mx-auto px-6 pt-10 pb-12">
           <div className="text-center mb-10">
             <p className="text-green-600 text-xs font-bold uppercase tracking-widest mb-2">Comment ça marche</p>
             <h2 className="text-3xl font-black text-gray-900">3 étapes. 30 secondes.</h2>
@@ -82,18 +91,6 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* Divider */}
-        <div className="h-px bg-gray-100 mx-6" />
-
-        {/* Marquee 1 — Recettes */}
-        <section className="py-12">
-          <div className="text-center mb-8 px-6">
-            <p className="text-green-600 text-xs font-bold uppercase tracking-widest mb-2">Inspiration</p>
-            <h2 className="text-2xl font-black text-gray-900">Des recettes qui donnent l&apos;eau à la bouche</h2>
-          </div>
-          <RecipeMarquee />
         </section>
 
         {/* Marquee 2 — Catégories */}
