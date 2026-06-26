@@ -3,16 +3,16 @@
 import { useState } from 'react'
 
 const RECIPES = [
-  { name: 'Pasta Carbonara', time: '20 min', cal: '650 kcal', img: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=280&fit=crop&q=80', emoji: '🍝', bg: 'from-orange-400 to-amber-500' },
+  { name: 'Pasta Carbonara', time: '20 min', cal: '650 kcal', img: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&h=280&fit=crop&q=80', emoji: '🍝', bg: 'from-orange-400 to-amber-500' },
   { name: 'Salade Niçoise', time: '15 min', cal: '320 kcal', img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&h=280&fit=crop&q=80', emoji: '🥗', bg: 'from-green-400 to-emerald-500' },
   { name: 'Poulet Rôti', time: '45 min', cal: '520 kcal', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=280&fit=crop&q=80', emoji: '🍗', bg: 'from-yellow-400 to-orange-400' },
   { name: 'Pizza Margherita', time: '30 min', cal: '680 kcal', img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=280&fit=crop&q=80', emoji: '🍕', bg: 'from-red-400 to-rose-500' },
   { name: 'Saumon Grillé', time: '20 min', cal: '420 kcal', img: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=280&fit=crop&q=80', emoji: '🐟', bg: 'from-blue-400 to-cyan-500' },
-  { name: 'Risotto Champignons', time: '35 min', cal: '480 kcal', img: 'https://images.unsplash.com/photo-1534422298391-e4f8517b2e3f?w=400&h=280&fit=crop&q=80', emoji: '🍄', bg: 'from-amber-400 to-yellow-500' },
+  { name: 'Risotto Champignons', time: '35 min', cal: '480 kcal', img: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=280&fit=crop&q=80', emoji: '🍄', bg: 'from-amber-400 to-yellow-500' },
   { name: 'Tarte aux Pommes', time: '40 min', cal: '380 kcal', img: 'https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?w=400&h=280&fit=crop&q=80', emoji: '🥧', bg: 'from-amber-300 to-orange-400' },
   { name: 'Soupe de Légumes', time: '25 min', cal: '180 kcal', img: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=280&fit=crop&q=80', emoji: '🥣', bg: 'from-green-300 to-teal-400' },
   { name: 'Omelette Provençale', time: '15 min', cal: '410 kcal', img: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&h=280&fit=crop&q=80', emoji: '🍳', bg: 'from-yellow-300 to-amber-400' },
-  { name: 'Gratin Dauphinois', time: '50 min', cal: '560 kcal', img: 'https://images.unsplash.com/photo-1574484284002-952d92a03a05?w=400&h=280&fit=crop&q=80', emoji: '🧀', bg: 'from-orange-300 to-yellow-400' },
+  { name: 'Gratin Dauphinois', time: '50 min', cal: '560 kcal', img: 'https://images.unsplash.com/photo-1558030137-a56c1b002d7d?w=400&h=280&fit=crop&q=80', emoji: '🧀', bg: 'from-orange-300 to-yellow-400' },
 ]
 
 function RecipeCard({ recipe }: { recipe: typeof RECIPES[0] }) {
