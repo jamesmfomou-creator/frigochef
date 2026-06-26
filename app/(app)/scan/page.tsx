@@ -16,7 +16,6 @@ export default function ScanPage() {
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [dragOver, setDragOver] = useState(false)
   const [showPremium, setShowPremium] = useState(false)
 
   const isPremium = profile?.plan === 'premium'
@@ -33,17 +32,9 @@ export default function ScanPage() {
     if (f) handleFile(f)
   }
 
-  function onDrop(e: React.DragEvent) {
-    e.preventDefault()
-    setDragOver(false)
-    const f = e.dataTransfer.files?.[0]
-    if (f?.type.startsWith('image/')) handleFile(f)
-  }
-
   async function analyze() {
     if (!file) return
     if (scanLimitReached) { setShowPremium(true); return }
-
     setLoading(true)
     setError(null)
     try {
@@ -52,12 +43,9 @@ export default function ScanPage() {
       const res = await fetch('/api/analyze', { method: 'POST', body: form })
       const data = await res.json()
       if (!data.ingredients) throw new Error()
-
       const ingredients: Ingredient[] = data.ingredients.map(
         (item: { name: string; confidence: number }, i: number) => ({
-          id: String(i + 1),
-          name: item.name,
-          confidence: item.confidence,
+          id: String(i + 1), name: item.name, confidence: item.confidence,
         })
       )
       sessionStorage.setItem('frigochef_ingredients', JSON.stringify(ingredients))
@@ -71,111 +59,162 @@ export default function ScanPage() {
 
   if (scanLimitReached) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
-        <AppHeader />
-        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-          <div className="text-5xl mb-4">🔒</div>
-          <h2 className="text-xl font-black text-gray-900 mb-2">Limite mensuelle atteinte</h2>
-          <p className="text-gray-500 text-sm mb-6">
-            Vous avez utilisé vos {FREE_SCAN_LIMIT} scans gratuits ce mois-ci.
-          </p>
-          <button
-            onClick={() => setShowPremium(true)}
-            className="bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-4 rounded-2xl transition-colors"
-          >
-            ⭐ Passer Premium — Scans illimités
-          </button>
-          <Link href="/dashboard" className="mt-4 text-gray-400 text-sm hover:text-gray-600 transition-colors">
-            Retour à l&apos;accueil
-          </Link>
-        </div>
+      <div className="min-h-screen bg-[#0B0B0B] flex flex-col items-center justify-center px-6 text-center">
+        <div className="text-5xl mb-4">🔒</div>
+        <h2 className="text-xl font-black text-white mb-2">Limite mensuelle atteinte</h2>
+        <p className="text-gray-500 text-sm mb-6">Vous avez utilisé vos {FREE_SCAN_LIMIT} scans gratuits ce mois-ci.</p>
+        <button onClick={() => setShowPremium(true)} className="bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-4 rounded-2xl transition-colors">
+          ⭐ Passer Premium
+        </button>
+        <Link href="/dashboard" className="mt-4 text-gray-600 text-sm hover:text-gray-400 transition-colors">← Retour</Link>
         {showPremium && <PremiumModal onClose={() => setShowPremium(false)} />}
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
-      <AppHeader />
-      <StepBar step={1} />
-
-      <main className="flex-1 px-6 py-8">
-        <div className="max-w-lg mx-auto">
-          <div className="mb-7">
-            <h1 className="text-2xl font-black text-gray-900 mb-1">Votre frigo</h1>
-            <p className="text-gray-500 text-sm">
-              Prenez une photo ou importez une image de vos ingrédients.
-              {!isPremium && (
-                <span className="ml-1 text-green-600 font-medium">
-                  {FREE_SCAN_LIMIT - (profile?.scan_count ?? 0)} scan{FREE_SCAN_LIMIT - (profile?.scan_count ?? 0) !== 1 ? 's' : ''} restant{FREE_SCAN_LIMIT - (profile?.scan_count ?? 0) !== 1 ? 's' : ''}
-                </span>
-              )}
-            </p>
-          </div>
-
-          {!preview ? (
-            <div
-              onDrop={onDrop}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
-              onDragLeave={() => setDragOver(false)}
-              className={`bg-white rounded-3xl border-2 border-dashed p-10 flex flex-col items-center gap-6 transition-all duration-200 ${
-                dragOver ? 'border-green-400 bg-green-50/40' : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <div className="w-20 h-20 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-4xl">🥦</div>
-              <div className="text-center">
-                <p className="font-semibold text-gray-800 text-base mb-1">Photo de vos ingrédients</p>
-                <p className="text-gray-400 text-sm">Frigo ouvert, légumes, tout ce que vous avez</p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
-                <button
-                  onClick={() => cameraInputRef.current?.click()}
-                  className="flex-1 inline-flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 active:scale-95 text-white font-semibold py-3.5 rounded-xl text-sm transition-all"
-                >
-                  <CameraIcon /> Appareil photo
-                </button>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex-1 inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 active:scale-95 text-gray-700 font-semibold py-3.5 rounded-xl text-sm border border-gray-200 transition-all"
-                >
-                  <UploadIcon /> Galerie
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="animate-scale-in">
-              <div className="relative rounded-3xl overflow-hidden bg-gray-100 shadow-sm mb-5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={preview} alt="Aperçu" className="w-full aspect-video object-cover" />
-                <button
-                  onClick={() => { setPreview(null); setFile(null) }}
-                  className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
-                >
-                  <CloseIcon />
-                </button>
-                <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full">
-                  ✓ Image prête
-                </div>
-              </div>
-              {error && (
-                <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-2xl px-4 py-3 mb-4">{error}</div>
-              )}
-              <button
-                onClick={analyze}
-                disabled={loading}
-                className="w-full bg-green-500 hover:bg-green-400 active:scale-[0.98] disabled:opacity-60 text-white font-bold py-5 rounded-2xl text-base shadow-lg shadow-green-500/25 transition-all"
-              >
-                {loading ? 'Analyse en cours…' : 'Analyser mes ingrédients →'}
-              </button>
-              <button onClick={() => { setPreview(null); setFile(null) }} className="w-full mt-3 text-gray-400 hover:text-gray-600 text-sm py-2 transition-colors">
-                Changer de photo
-              </button>
-            </div>
+    <div className="min-h-screen bg-[#0B0B0B] flex flex-col">
+      {/* Header */}
+      <header className="px-6 pt-8 pb-4">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
+          <Link href="/dashboard" className="p-2 -ml-2 text-gray-600 hover:text-gray-400 transition-colors">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          </Link>
+          <span className="text-white font-bold text-lg">Frigo<span className="text-green-400">Chef</span></span>
+          {!isPremium && (
+            <span className="text-xs text-gray-600 font-medium">
+              {FREE_SCAN_LIMIT - (profile?.scan_count ?? 0)} scan{FREE_SCAN_LIMIT - (profile?.scan_count ?? 0) !== 1 ? 's' : ''} restant{FREE_SCAN_LIMIT - (profile?.scan_count ?? 0) !== 1 ? 's' : ''}
+            </span>
           )}
         </div>
-      </main>
+      </header>
 
-      {loading && <LoadingOverlay message="Analyse des ingrédients…" sub="L'IA examine votre photo" />}
+      {!preview ? (
+        /* ── Mode SCAN animé ── */
+        <div className="flex-1 flex flex-col items-center justify-between px-6 pb-12">
+          {/* Instruction */}
+          <div className="text-center pt-6 pb-8">
+            <p className="text-gray-400 text-sm font-medium tracking-wide uppercase">Pointez vers vos ingrédients</p>
+          </div>
+
+          {/* Zone de scan */}
+          <div className="relative w-72 h-72 sm:w-80 sm:h-80">
+            {/* Fond semi-transparent */}
+            <div className="absolute inset-0 bg-green-400/[0.04] rounded-sm" />
+
+            {/* Coins de visée */}
+            <div className="absolute top-0 left-0 w-7 h-7 border-l-[3px] border-t-[3px] border-green-400 rounded-tl-sm" />
+            <div className="absolute top-0 right-0 w-7 h-7 border-r-[3px] border-t-[3px] border-green-400 rounded-tr-sm" />
+            <div className="absolute bottom-0 left-0 w-7 h-7 border-l-[3px] border-b-[3px] border-green-400 rounded-bl-sm" />
+            <div className="absolute bottom-0 right-0 w-7 h-7 border-r-[3px] border-b-[3px] border-green-400 rounded-br-sm" />
+
+            {/* Ligne de scan animée */}
+            <div
+              className="absolute left-2 right-2 h-[2px] animate-scan-line"
+              style={{
+                background: 'linear-gradient(90deg, transparent, #4ade80, #22c55e, #4ade80, transparent)',
+                boxShadow: '0 0 8px 2px rgba(34,197,94,0.5)',
+              }}
+            />
+
+            {/* Halo central pulsant */}
+            <div className="absolute inset-8 rounded-sm border border-green-400/10 animate-scan-pulse" />
+
+            {/* Texte central */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-green-400/10 flex items-center justify-center animate-scan-pulse">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              </div>
+              <p className="text-green-400/70 text-xs font-medium tracking-widest uppercase">Scan actif</p>
+            </div>
+          </div>
+
+          {/* Boutons */}
+          <div className="w-full max-w-xs space-y-3 mt-8">
+            <button
+              onClick={() => cameraInputRef.current?.click()}
+              className="w-full flex items-center justify-center gap-2.5 bg-green-500 hover:bg-green-400 active:scale-95 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-green-500/25"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              Prendre une photo
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full flex items-center justify-center gap-2.5 bg-white/[0.07] hover:bg-white/[0.11] border border-white/10 text-white font-semibold py-4 rounded-2xl transition-all"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+              </svg>
+              Choisir depuis la galerie
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* ── Mode PREVIEW ── */
+        <div className="flex-1 flex flex-col px-6 pb-10 pt-4">
+          <div className="max-w-lg mx-auto w-full flex-1 flex flex-col">
+            {/* Preview image */}
+            <div className="relative flex-1 rounded-3xl overflow-hidden bg-gray-900 mb-5 min-h-64">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={preview} alt="Aperçu" className="w-full h-full object-cover" />
+
+              {/* Scan overlay animé sur la preview */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-3 left-3 w-6 h-6 border-l-2 border-t-2 border-green-400" />
+                <div className="absolute top-3 right-3 w-6 h-6 border-r-2 border-t-2 border-green-400" />
+                <div className="absolute bottom-3 left-3 w-6 h-6 border-l-2 border-b-2 border-green-400" />
+                <div className="absolute bottom-3 right-3 w-6 h-6 border-r-2 border-b-2 border-green-400" />
+              </div>
+
+              <button
+                onClick={() => { setPreview(null); setFile(null) }}
+                className="absolute top-3 right-12 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+
+              <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm text-green-400 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                Prêt à analyser
+              </div>
+            </div>
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-2xl px-4 py-3 mb-4">{error}</div>
+            )}
+
+            <button
+              onClick={analyze}
+              disabled={loading}
+              className="w-full bg-green-500 hover:bg-green-400 active:scale-[0.98] disabled:opacity-60 text-white font-bold py-5 rounded-2xl text-base shadow-lg shadow-green-500/25 transition-all"
+            >
+              {loading ? 'Analyse en cours…' : 'Analyser mes ingrédients →'}
+            </button>
+            <button onClick={() => { setPreview(null); setFile(null) }} className="w-full mt-3 text-gray-600 hover:text-gray-400 text-sm py-2 transition-colors">
+              Changer de photo
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Loading overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
+          <div className="relative mb-6">
+            <div className="w-16 h-16 rounded-full border-4 border-green-400/20" />
+            <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-transparent border-t-green-400 animate-spin" />
+          </div>
+          <p className="text-white font-bold text-lg">Analyse des ingrédients…</p>
+          <p className="text-gray-500 text-sm mt-1">Quelques secondes</p>
+        </div>
+      )}
+
       {showPremium && <PremiumModal onClose={() => setShowPremium(false)} />}
 
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onInputChange} />
@@ -183,54 +222,3 @@ export default function ScanPage() {
     </div>
   )
 }
-
-function AppHeader() {
-  return (
-    <header className="bg-white border-b border-gray-100 px-6 py-4">
-      <div className="max-w-lg mx-auto flex items-center gap-3">
-        <Link href="/dashboard" className="p-2 -ml-2 text-gray-400 hover:text-gray-700 rounded-xl transition-colors">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-        </Link>
-        <span className="font-bold text-gray-900">Frigo<span className="text-green-500">Chef</span></span>
-      </div>
-    </header>
-  )
-}
-
-function StepBar({ step }: { step: number }) {
-  const steps = ['Photo', 'Ingrédients', 'Recettes']
-  return (
-    <div className="bg-white border-b border-gray-100 px-6 py-4">
-      <div className="max-w-lg mx-auto flex items-center gap-3">
-        {steps.map((label, i) => (
-          <div key={label} className="flex items-center gap-3 flex-1 last:flex-none">
-            <div className="flex items-center gap-1.5">
-              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${i + 1 < step ? 'bg-green-500 text-white' : i + 1 === step ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                {i + 1 < step ? '✓' : i + 1}
-              </div>
-              <span className={`text-xs font-medium ${i + 1 === step ? 'text-gray-900' : 'text-gray-400'}`}>{label}</span>
-            </div>
-            {i < steps.length - 1 && <div className={`flex-1 h-px ${i + 1 < step ? 'bg-green-500' : 'bg-gray-100'}`} />}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function LoadingOverlay({ message, sub }: { message: string; sub?: string }) {
-  return (
-    <div className="fixed inset-0 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center z-50 animate-fade-in">
-      <div className="relative mb-6">
-        <div className="w-16 h-16 rounded-full border-4 border-gray-100" />
-        <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-transparent border-t-green-500 animate-spin" />
-      </div>
-      <p className="text-gray-900 font-bold text-lg">{message}</p>
-      {sub && <p className="text-gray-400 text-sm mt-1">{sub}</p>}
-    </div>
-  )
-}
-
-function CameraIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> }
-function UploadIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> }
-function CloseIcon() { return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> }

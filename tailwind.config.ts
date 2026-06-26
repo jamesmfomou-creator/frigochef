@@ -18,6 +18,8 @@ const config: Config = {
         'spin-slow': 'spin 1.2s linear infinite',
         'marquee': 'marquee 35s linear infinite',
         'marquee-reverse': 'marqueeReverse 28s linear infinite',
+        'scan-line': 'scanLine 2.2s ease-in-out infinite',
+        'scan-pulse': 'scanPulse 2.2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -39,6 +41,18 @@ const config: Config = {
         marqueeReverse: {
           '0%': { transform: 'translateX(-50%)' },
           '100%': { transform: 'translateX(0)' },
+        },
+        scanLine: {
+          '0%': { top: '0%', opacity: '1' },
+          '45%': { top: '100%', opacity: '0.8' },
+          '50%': { top: '100%', opacity: '0' },
+          '55%': { top: '0%', opacity: '0' },
+          '60%': { opacity: '1' },
+          '100%': { top: '0%', opacity: '1' },
+        },
+        scanPulse: {
+          '0%, 100%': { opacity: '0.6' },
+          '50%': { opacity: '1' },
         },
       },
     },
