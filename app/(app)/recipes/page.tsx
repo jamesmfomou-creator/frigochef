@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Recipe, Ingredient } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
+import { useProfile } from '@/components/providers/ProfileProvider'
 
 // Pool de belles photos food fiables (IDs Unsplash vérifiés)
 const FOOD_POOL = [
@@ -39,9 +40,13 @@ function imgUrl(title: string, index: number): string {
 
 export default function RecipesPage() {
   const router = useRouter()
+  const profile = useProfile()
+  const isDemo = profile?.id === 'demo'
+
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [selected, setSelected] = useState<{ recipe: Recipe; index: number } | null>(null)
   const [showPantryModal, setShowPantryModal] = useState(false)
+  const [showAccountPrompt, setShowAccountPrompt] = useState(false)
   const [detectedIngredients, setDetectedIngredients] = useState<Ingredient[]>([])
 
   useEffect(() => {
@@ -50,10 +55,17 @@ export default function RecipesPage() {
     setRecipes(JSON.parse(stored))
     const ing = sessionStorage.getItem('frigochef_ingredients')
     if (ing) setDetectedIngredients(JSON.parse(ing))
-    // Show pantry prompt after a short delay
-    const t = setTimeout(() => setShowPantryModal(true), 1500)
-    return () => clearTimeout(t)
-  }, [router])
+
+    if (isDemo) {
+      // En mode démo : montrer la création de compte après 2s
+      const t = setTimeout(() => setShowAccountPrompt(true), 2000)
+      return () => clearTimeout(t)
+    } else {
+      // Utilisateur connecté : prompt pantry après 1.5s
+      const t = setTimeout(() => setShowPantryModal(true), 1500)
+      return () => clearTimeout(t)
+    }
+  }, [router, isDemo])
 
   function open(recipe: Recipe, index: number) {
     setSelected({ recipe, index })
@@ -96,6 +108,13 @@ export default function RecipesPage() {
         <PantryPrompt
           ingredients={detectedIngredients}
           onClose={() => setShowPantryModal(false)}
+        />
+      )}
+
+      {showAccountPrompt && (
+        <AccountCreationPrompt
+          recipesCount={recipes.length}
+          onClose={() => setShowAccountPrompt(false)}
         />
       )}
     </div>
@@ -284,6 +303,64 @@ function PantryPrompt({ ingredients, onClose }: { ingredients: Ingredient[]; onC
             </div>
           </>
         )}
+      </div>
+    </div>
+  )
+}
+
+function AccountCreationPrompt({ recipesCount, onClose }: { recipesCount: number; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center animate-fade-in">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-lg bg-white rounded-t-[2rem] p-6 shadow-2xl animate-slide-up">
+        {/* Header */}
+        <div className="flex items-start gap-4 mb-5">
+          <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center text-2xl shrink-0">🎉</div>
+          <div>
+            <h3 className="font-black text-gray-900 text-lg leading-tight">
+              {recipesCount} recettes générées !
+            </h3>
+            <p className="text-gray-400 text-sm mt-0.5">Créez un compte pour les sauvegarder</p>
+          </div>
+          <button onClick={onClose} className="ml-auto text-gray-300 hover:text-gray-500 transition-colors shrink-0 p-1">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        {/* Benefits */}
+        <div className="bg-gray-50 rounded-2xl p-4 mb-5 space-y-2.5">
+          {[
+            { icon: '💾', text: 'Sauvegardez toutes vos recettes' },
+            { icon: '📦', text: 'Accédez au Pantry intelligent' },
+            { icon: '📅', text: 'Planifiez votre semaine automatiquement' },
+            { icon: '♻️', text: 'Réduisez le gaspillage alimentaire' },
+          ].map(({ icon, text }) => (
+            <div key={text} className="flex items-center gap-3 text-sm text-gray-600">
+              <span>{icon}</span>
+              <span>{text}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* CTAs */}
+        <div className="flex flex-col gap-3">
+          <a
+            href="/login"
+            className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold py-4 rounded-2xl transition-colors shadow-lg shadow-green-500/20"
+          >
+            Créer mon compte gratuit →
+          </a>
+          <button
+            onClick={onClose}
+            className="w-full text-gray-400 hover:text-gray-600 text-sm font-medium py-2 transition-colors"
+          >
+            Continuer sans compte
+          </button>
+        </div>
+
+        <p className="text-center text-gray-300 text-xs mt-3">
+          Gratuit · Sans carte bancaire · En 30 secondes
+        </p>
       </div>
     </div>
   )
