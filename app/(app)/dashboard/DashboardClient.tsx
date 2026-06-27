@@ -35,6 +35,7 @@ export default function DashboardClient({
   const searchParams = useSearchParams()
   const router = useRouter()
   const isPremium = profile?.plan === 'premium'
+  const isDemo = profile?.id === 'demo'
 
   useEffect(() => {
     if (searchParams.get('upgraded') === 'true') {
