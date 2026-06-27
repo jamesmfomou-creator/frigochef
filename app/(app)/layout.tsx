@@ -4,12 +4,14 @@ import { Profile } from '@/lib/types'
 import ProfileProvider from '@/components/providers/ProfileProvider'
 import BottomNav from '@/components/navigation/BottomNav'
 
+// Démo = plan free (scan illimité bypassed dans scan page via isDemo)
+// Pantry/Planning/Courses → PremiumGate → PremiumModal détecte isDemo → "Créer un compte"
 const DEMO_PROFILE: Profile = {
   id: 'demo',
   email: 'demo@frigochef.app',
   name: 'Demo',
   avatar_url: null,
-  plan: 'premium',
+  plan: 'free',
   scan_count: 0,
   scan_reset_date: new Date().toISOString().split('T')[0],
   created_at: new Date().toISOString(),

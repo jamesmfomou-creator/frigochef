@@ -20,7 +20,8 @@ export default function ScanPage() {
   const [showPremium, setShowPremium] = useState(false)
 
   const isPremium = profile?.plan === 'premium'
-  const scanLimitReached = !isPremium && (profile?.scan_count ?? 0) >= FREE_SCAN_LIMIT
+  // En démo : scan illimité pour montrer l'expérience complète
+  const scanLimitReached = !isDemo && !isPremium && (profile?.scan_count ?? 0) >= FREE_SCAN_LIMIT
 
   function handleFile(f: File) {
     setFile(f)

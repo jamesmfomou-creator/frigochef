@@ -8,7 +8,7 @@ const DEMO_PROFILE: Profile = {
   email: 'demo@frigochef.app',
   name: 'Demo',
   avatar_url: null,
-  plan: 'premium',
+  plan: 'free',
   scan_count: 0,
   scan_reset_date: new Date().toISOString().split('T')[0],
   created_at: new Date().toISOString(),

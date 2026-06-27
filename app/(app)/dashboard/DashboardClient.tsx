@@ -71,8 +71,8 @@ export default function DashboardClient({
             </div>
           </Link>
         </div>
-        {/* Scan counter */}
-        {!isPremium && (
+        {/* Scan counter — masqué en démo */}
+        {!isPremium && !isDemo && (
           <div className="max-w-lg mx-auto mt-4">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs text-gray-400">Scans ce mois</span>
