@@ -8,7 +8,7 @@ export default function DemoPage() {
 
   useEffect(() => {
     document.cookie = 'frigochef_demo=true; path=/; max-age=86400'
-    router.replace('/')
+    router.replace('/scan')
   }, [router])
 
   return (
