@@ -7,6 +7,7 @@ import { Recipe, Ingredient } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
 import { useProfile } from '@/components/providers/ProfileProvider'
 import { trackRecipesGenerated, trackRecipeOpened, trackAccountPromptShown } from '@/lib/analytics'
+import PremiumModal from '@/components/premium/PremiumModal'
 
 // Pool de belles photos food fiables (IDs Unsplash vérifiés)
 const FOOD_POOL = [
@@ -48,6 +49,7 @@ export default function RecipesPage() {
   const [selected, setSelected] = useState<{ recipe: Recipe; index: number } | null>(null)
   const [showPantryModal, setShowPantryModal] = useState(false)
   const [showAccountPrompt, setShowAccountPrompt] = useState(false)
+  const [showPremium, setShowPremium] = useState(false)
   const [detectedIngredients, setDetectedIngredients] = useState<Ingredient[]>([])
 
   useEffect(() => {
@@ -119,9 +121,15 @@ export default function RecipesPage() {
       {showAccountPrompt && (
         <AccountCreationPrompt
           recipesCount={recipes.length}
-          onClose={() => setShowAccountPrompt(false)}
+          onClose={() => {
+            setShowAccountPrompt(false)
+            // Paywall 5s après refus de créer un compte
+            setTimeout(() => setShowPremium(true), 5000)
+          }}
         />
       )}
+
+      {showPremium && <PremiumModal onClose={() => setShowPremium(false)} />}
     </div>
   )
 }

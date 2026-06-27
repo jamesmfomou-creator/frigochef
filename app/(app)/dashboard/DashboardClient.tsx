@@ -44,6 +44,19 @@ export default function DashboardClient({
       router.replace('/dashboard', { scroll: false })
     }
   }, [searchParams, router])
+
+  // Paywall 5s après création de compte (free, non démo, jamais montré)
+  useEffect(() => {
+    if (isPremium || isDemo) return
+    const key = 'frigochef_paywall_shown'
+    if (typeof window !== 'undefined' && !localStorage.getItem(key)) {
+      const t = setTimeout(() => {
+        setShowPremium(true)
+        localStorage.setItem(key, '1')
+      }, 5000)
+      return () => clearTimeout(t)
+    }
+  }, [isPremium, isDemo])
   const firstName = profile?.name?.split(' ')[0] ?? 'vous'
   const estimatedSavings = Math.round(totalScans * 1.5)
 
