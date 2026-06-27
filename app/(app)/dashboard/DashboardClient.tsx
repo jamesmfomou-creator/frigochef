@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Profile, PantryItem, MealPlanDay, FREE_SCAN_LIMIT } from '@/lib/types'
 import PremiumModal from '@/components/premium/PremiumModal'
+import { trackPurchase, trackPremiumModalShown } from '@/lib/analytics'
 
 interface Props {
   profile: Profile | null
@@ -38,12 +39,17 @@ export default function DashboardClient({
   useEffect(() => {
     if (searchParams.get('upgraded') === 'true') {
       setUpgraded(true)
-      // Nettoie le paramètre URL sans recharger la page
+      trackPurchase(`stripe_${Date.now()}`, 9.99)
       router.replace('/dashboard', { scroll: false })
     }
   }, [searchParams, router])
   const firstName = profile?.name?.split(' ')[0] ?? 'vous'
   const estimatedSavings = Math.round(totalScans * 1.5)
+
+  function openPremiumModal(source: string) {
+    setShowPremium(true)
+    trackPremiumModalShown(source)
+  }
 
   function premiumGate(href: string) {
     if (isPremium) return href

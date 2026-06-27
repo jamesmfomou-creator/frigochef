@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useProfile } from '@/components/providers/ProfileProvider'
+import { trackCheckoutStarted } from '@/lib/analytics'
 
 const FEATURES = [
   'Scans illimités',
@@ -68,6 +69,7 @@ export default function PremiumModal({ onClose }: Props) {
   async function handleUpgrade() {
     setLoading(true)
     setError(null)
+    trackCheckoutStarted()
     try {
       const res = await fetch('/api/stripe/checkout', { method: 'POST' })
       const data = await res.json()

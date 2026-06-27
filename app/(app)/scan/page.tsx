@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Ingredient, FREE_SCAN_LIMIT } from '@/lib/types'
 import { useProfile } from '@/components/providers/ProfileProvider'
 import PremiumModal from '@/components/premium/PremiumModal'
+import { trackScanStarted, trackScanCompleted } from '@/lib/analytics'
 
 export default function ScanPage() {
   const router = useRouter()
@@ -25,6 +26,7 @@ export default function ScanPage() {
     setFile(f)
     setPreview(URL.createObjectURL(f))
     setError(null)
+    trackScanStarted()
   }
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -50,6 +52,7 @@ export default function ScanPage() {
       )
       sessionStorage.setItem('frigochef_ingredients', JSON.stringify(ingredients))
       if (data.scanId) sessionStorage.setItem('frigochef_scan_id', data.scanId)
+      trackScanCompleted(ingredients.length)
       router.push('/ingredients')
     } catch {
       setError("Analyse échouée. Réessayez.")

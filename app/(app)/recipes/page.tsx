@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Recipe, Ingredient } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
 import { useProfile } from '@/components/providers/ProfileProvider'
+import { trackRecipesGenerated, trackRecipeOpened, trackAccountPromptShown } from '@/lib/analytics'
 
 // Pool de belles photos food fiables (IDs Unsplash vérifiés)
 const FOOD_POOL = [
@@ -52,13 +53,16 @@ export default function RecipesPage() {
   useEffect(() => {
     const stored = sessionStorage.getItem('frigochef_recipes')
     if (!stored) { router.replace('/scan'); return }
-    setRecipes(JSON.parse(stored))
+    const parsed = JSON.parse(stored)
+    setRecipes(parsed)
     const ing = sessionStorage.getItem('frigochef_ingredients')
-    if (ing) setDetectedIngredients(JSON.parse(ing))
+    const parsedIng = ing ? JSON.parse(ing) : []
+    if (parsedIng.length) setDetectedIngredients(parsedIng)
+    trackRecipesGenerated(parsed.length, parsedIng.length)
 
     if (isDemo) {
       // En mode démo : montrer la création de compte après 2s
-      const t = setTimeout(() => setShowAccountPrompt(true), 2000)
+      const t = setTimeout(() => { setShowAccountPrompt(true); trackAccountPromptShown() }, 2000)
       return () => clearTimeout(t)
     } else {
       // Utilisateur connecté : prompt pantry après 1.5s
@@ -70,6 +74,7 @@ export default function RecipesPage() {
   function open(recipe: Recipe, index: number) {
     setSelected({ recipe, index })
     document.body.style.overflow = 'hidden'
+    trackRecipeOpened(recipe.title)
   }
   function close() { setSelected(null); document.body.style.overflow = '' }
 
