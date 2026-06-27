@@ -164,8 +164,94 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Pricing */}
+        <section className="py-20 px-6 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <p className="text-green-600 text-xs font-bold uppercase tracking-widest mb-2">Tarifs</p>
+              <h2 className="text-3xl font-black text-gray-900 mb-3">Simple et transparent</h2>
+              <p className="text-gray-400 text-sm">Commencez gratuitement, passez Premium quand vous êtes prêt</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
+
+              {/* Plan Gratuit */}
+              <div className="bg-gray-50 border border-gray-200 rounded-3xl p-7 flex flex-col">
+                <div className="mb-6">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Gratuit</p>
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <span className="text-4xl font-black text-gray-900">0€</span>
+                    <span className="text-gray-400 text-sm">/mois</span>
+                  </div>
+                  <p className="text-gray-400 text-xs">Sans carte bancaire</p>
+                </div>
+                <ul className="space-y-3 flex-1 mb-7">
+                  {[
+                    { text: '5 scans par mois', ok: true },
+                    { text: 'Détection IA des ingrédients', ok: true },
+                    { text: '5 recettes par scan', ok: true },
+                    { text: 'Correction des ingrédients', ok: true },
+                    { text: 'Pantry intelligent', ok: false },
+                    { text: 'Planning automatique', ok: false },
+                    { text: 'Liste de courses', ok: false },
+                    { text: 'Historique complet', ok: false },
+                  ].map(({ text, ok }) => (
+                    <li key={text} className={`flex items-center gap-3 text-sm ${ok ? 'text-gray-700' : 'text-gray-300'}`}>
+                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${ok ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-300'}`}>
+                        {ok ? '✓' : '✕'}
+                      </span>
+                      {text}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/demo" className="w-full flex items-center justify-center bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold py-3.5 rounded-2xl transition-colors text-sm">
+                  Commencer gratuitement
+                </Link>
+              </div>
+
+              {/* Plan Premium */}
+              <div className="bg-gray-900 border border-gray-800 rounded-3xl p-7 flex flex-col relative overflow-hidden">
+                {/* Badge populaire */}
+                <div className="absolute top-5 right-5 bg-green-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide">
+                  Populaire
+                </div>
+                <div className="mb-6">
+                  <p className="text-xs font-bold text-green-400 uppercase tracking-widest mb-2">Premium</p>
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <span className="text-4xl font-black text-white">9,99€</span>
+                    <span className="text-gray-500 text-sm">/mois</span>
+                  </div>
+                  <p className="text-gray-500 text-xs">Annulable à tout moment</p>
+                </div>
+                <ul className="space-y-3 flex-1 mb-7">
+                  {[
+                    'Scans illimités',
+                    'Détection IA des ingrédients',
+                    '5 recettes par scan',
+                    'Correction des ingrédients',
+                    'Pantry intelligent',
+                    'Planning automatique',
+                    'Liste de courses auto',
+                    'Historique complet',
+                    'Suggestions anti-gaspillage',
+                  ].map((text) => (
+                    <li key={text} className="flex items-center gap-3 text-sm text-gray-300">
+                      <span className="w-4 h-4 bg-green-500/20 rounded-full flex items-center justify-center text-[10px] font-bold text-green-400 shrink-0">✓</span>
+                      {text}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/demo" className="w-full flex items-center justify-center bg-green-500 hover:bg-green-400 text-white font-bold py-3.5 rounded-2xl transition-colors text-sm shadow-lg shadow-green-500/20">
+                  Essayer gratuitement →
+                </Link>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
         {/* Final CTA */}
-        <section className="text-center py-20 px-6 bg-white">
+        <section className="text-center py-20 px-6 bg-white border-t border-gray-100">
           <h2 className="text-4xl font-black text-gray-900 mb-3">Prêt à cuisiner mieux ?</h2>
           <p className="text-gray-400 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
             Transformez n&apos;importe quoi dans votre frigo en un repas délicieux. En quelques secondes.
