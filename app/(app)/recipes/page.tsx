@@ -129,7 +129,7 @@ export default function RecipesPage() {
         />
       )}
 
-      {showPremium && <PremiumModal onClose={() => setShowPremium(false)} />}
+      {showPremium && <PremiumModal forcePaywall onClose={() => setShowPremium(false)} />}
     </div>
   )
 }

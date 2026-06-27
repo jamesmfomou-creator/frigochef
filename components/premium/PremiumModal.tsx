@@ -15,16 +15,18 @@ const FEATURES = [
 
 interface Props {
   onClose?: () => void
+  /** Force l'affichage du paywall Stripe même en mode démo */
+  forcePaywall?: boolean
 }
 
-export default function PremiumModal({ onClose }: Props) {
+export default function PremiumModal({ onClose, forcePaywall = false }: Props) {
   const profile = useProfile()
   const isDemo = profile?.id === 'demo'
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // En mode démo → montrer d'abord la création de compte
-  if (isDemo) {
+  // En mode démo sans forcePaywall → montrer d'abord la création de compte
+  if (isDemo && !forcePaywall) {
     return (
       <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center animate-fade-in">
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
@@ -103,10 +105,14 @@ export default function PremiumModal({ onClose }: Props) {
         )}
 
         {/* Header */}
-        <div className="text-center mb-7">
+        <div className="text-center mb-6">
           <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">⭐</div>
-          <h2 className="text-2xl font-black text-gray-900 mb-1.5">Passez Premium</h2>
-          <p className="text-gray-400 text-sm">Débloquez l&apos;assistant alimentaire complet</p>
+          <h2 className="text-2xl font-black text-gray-900 mb-1">Passez Premium</h2>
+          <div className="inline-flex items-baseline gap-1 mt-1">
+            <span className="text-3xl font-black text-gray-900">9,99€</span>
+            <span className="text-gray-400 text-sm">/mois</span>
+          </div>
+          <p className="text-gray-400 text-xs mt-1">Annulable à tout moment</p>
         </div>
 
         {/* Features */}
@@ -126,7 +132,19 @@ export default function PremiumModal({ onClose }: Props) {
           </div>
         )}
 
-        {/* CTA */}
+        {/* CTA — démo + forcePaywall → login, sinon → Stripe */}
+        {isDemo && forcePaywall ? (
+          <a
+            href="/login"
+            className="w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 rounded-2xl transition-all"
+            onClick={() => localStorage.setItem('frigochef_upgrade_intent', '1')}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+            Créer un compte &amp; Passer Premium
+          </a>
+        ) : (
         <button
           onClick={handleUpgrade}
           disabled={loading}
@@ -146,6 +164,7 @@ export default function PremiumModal({ onClose }: Props) {
             </>
           )}
         </button>
+        )}
 
         <p className="text-center text-gray-400 text-xs mt-3">
           Paiement sécurisé par Stripe · Annulable à tout moment

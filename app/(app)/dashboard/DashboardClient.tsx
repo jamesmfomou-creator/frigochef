@@ -45,11 +45,19 @@ export default function DashboardClient({
     }
   }, [searchParams, router])
 
-  // Paywall 5s après création de compte (free, non démo, jamais montré)
+  // Paywall après création de compte (free, non démo)
   useEffect(() => {
     if (isPremium || isDemo) return
+    if (typeof window === 'undefined') return
+    // Si l'utilisateur avait l'intent d'upgrade depuis la démo → afficher immédiatement
+    if (localStorage.getItem('frigochef_upgrade_intent')) {
+      localStorage.removeItem('frigochef_upgrade_intent')
+      setShowPremium(true)
+      return
+    }
+    // Sinon → paywall 5s après la première visite du dashboard
     const key = 'frigochef_paywall_shown'
-    if (typeof window !== 'undefined' && !localStorage.getItem(key)) {
+    if (!localStorage.getItem(key)) {
       const t = setTimeout(() => {
         setShowPremium(true)
         localStorage.setItem(key, '1')
