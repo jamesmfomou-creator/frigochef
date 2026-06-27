@@ -32,8 +32,18 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
       <header className="bg-white border-b border-gray-100 px-6 pt-8 pb-5">
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-black text-gray-900">Mon compte</h1>
+          <a
+            href="/"
+            className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            Accueil
+          </a>
         </div>
       </header>
       <main className="max-w-lg mx-auto px-4 py-5 space-y-4">
