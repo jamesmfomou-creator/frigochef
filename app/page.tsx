@@ -46,11 +46,11 @@ export default function LandingPage() {
             Prenez une photo de vos ingrédients. Notre IA détecte ce que vous avez et génère 5 recettes personnalisées en quelques secondes.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/scan" className="inline-flex items-center justify-center gap-2.5 bg-green-500 hover:bg-green-400 active:scale-95 text-white text-base font-bold px-8 py-4 rounded-2xl shadow-lg shadow-green-500/30 transition-all">
+            <Link href="/demo" className="inline-flex items-center justify-center gap-2.5 bg-green-500 hover:bg-green-400 active:scale-95 text-white text-base font-bold px-8 py-4 rounded-2xl shadow-lg shadow-green-500/30 transition-all">
               <IconCamera /> Scanner mes ingrédients
             </Link>
-            <Link href="/demo" className="inline-flex items-center justify-center gap-2 bg-white/[0.07] hover:bg-white/[0.11] border border-white/10 text-white text-base font-semibold px-8 py-4 rounded-2xl transition-all">
-              Voir la démo →
+            <Link href="/login" className="inline-flex items-center justify-center gap-2 bg-white/[0.07] hover:bg-white/[0.11] border border-white/10 text-white text-base font-semibold px-8 py-4 rounded-2xl transition-all">
+              Se connecter →
             </Link>
           </div>
           <p className="text-gray-600 text-xs mt-5 tracking-wide uppercase">Gratuit · Instantané · Sans inscription</p>
